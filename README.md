@@ -32,3 +32,21 @@ in terms of nested maps and lists), the NovemDoc is as follows in practice:
 Helps to:
 
 * store in mongo
+
+
+Status:
+
+I've built this type of class several times over the last year, this is just
+the base of trying to make it one last time for reuse. Some of the things that
+I've done in such classes:
+
+* support for transformations
+* support for object merge
+* disk storage
+* more metadata
+* document decomposition and recomposition
+* some sort of schema support
+
+Other things:
+
+* graph db and graphql support

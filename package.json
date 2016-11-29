@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/pyrrho314/novemdoc/issues"
   },
-  "homepage": "https://github.com/pyrrho314/novemdoc#readme"
+  "homepage": "https://github.com/pyrrho314/novemdoc#readme",
+  "dependencies": {
+    "dot-object": "1.5.4",
+    "mongodb": "2.2.11"
+  }
 }
