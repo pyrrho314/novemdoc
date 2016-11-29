@@ -90,9 +90,6 @@ class NovemDoc
     //  PROPERTIES
      //
       //////
-    get json(){
-        return JSON.stringify(initarg.dict);
-    }
     
     get doctype() {
         return this.get("_ndoc.doctype");
@@ -152,6 +149,19 @@ class NovemDoc
     {
         var val =  dot.pick(key, this.dict)    ;
         return typeof(val) != "undefined"; 
+    }
+    
+    json(pretty){
+        var retv = null;
+        if (pretty)
+        {
+            retv = JSON.stringify(this.dict, null, 4)
+        }
+        else
+        {
+            retv = JSON.stringify(this.dict);
+        }
+        return retv;
     }
     
     set(key, value)

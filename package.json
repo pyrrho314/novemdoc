@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/pyrrho314/novemdoc#readme",
   "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
     "dot-object": "1.5.4",
     "mongodb": "2.2.11"
   }
