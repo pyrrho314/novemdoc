@@ -2,7 +2,7 @@
   "name": "novemdoc",
   "version": "0.0.3",
   "description": "Helps with passing JSON style dictionary structures, adds document type system and automatic storage option.",
-  "main": "novemdoc.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,6 +18,12 @@
   "homepage": "https://github.com/pyrrho314/novemdoc#readme",
   "dependencies": {
     "dot-object": "1.5.4",
+    "lodash": "4.17.4",
     "mongodb": "2.2.11"
+  },
+  "devDependencies": {
+    "eslint": "3.14.1",
+    "eslint-plugin-react": "6.9.0",
+    "minimist": "1.2.0"
   }
 }

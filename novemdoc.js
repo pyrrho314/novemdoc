@@ -34,6 +34,9 @@ class NovemDoc
             dot: <FUTURE table of dot notation list>
           }
         */
+        if (!initarg) {
+            initarg = {dict:{}};
+        }
         if (true) console.log("nd37: mkdoc", initarg);
         
         // argument adaptation
