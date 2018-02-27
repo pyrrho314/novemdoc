@@ -1,0 +1,19 @@
+trade_inventory
+    trades[]
+        trade
+            price_stack
+                type: bread
+                count: 12
+            product_stack
+                type: book
+                count: 1
+         trade
+            price_stack
+                type: gold_nugget
+                count: 1
+            product_stack  
+                type: writable_book
+                count: 1
+
+    
+    

@@ -1,0 +1,13 @@
+grandparents
+    grandmother: mawmaw
+    grandfather: hippop
+    parent
+        son: hello
+        daughter: hi
+    uncle
+        cousin_1: whaat?
+        cousin_2: yo yo yo
+    aunt
+        cousin_a: howdy
+        cousin_b: weeehaaaw
+        

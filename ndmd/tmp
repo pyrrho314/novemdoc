@@ -1,0 +1,266 @@
+------------
+LINE: "trade_inventory"
+md23: parsed: trade_inventory {}
+(same level #1)
+md188: dict {} ParseLine {
+  line: 'trade_inventory',
+  head: 'trade_inventory',
+  val: {},
+  valtype: 'dict',
+  indent: 0,
+  level: null }
+------------
+LINE: "    trades[]"
+md23: parsed: trades []
+(same level #1)
+md188: dict { trade_inventory: {} } ParseLine {
+  line: '    trades[]',
+  head: 'trades',
+  val: [],
+  valtype: 'list',
+  indent: 0,
+  level: null }
+------------
+LINE: "        trade"
+md23: parsed: trade {}
+(same level #1)
+md188: dict { trade_inventory: {}, trades: [] } ParseLine {
+  line: '        trade',
+  head: 'trade',
+  val: {},
+  valtype: 'dict',
+  indent: 0,
+  level: null }
+------------
+LINE: "            price_stack"
+md23: parsed: price_stack {}
+(same level #1)
+md188: dict { trade_inventory: {}, trades: [], trade: {} } ParseLine {
+  line: '            price_stack',
+  head: 'price_stack',
+  val: {},
+  valtype: 'dict',
+  indent: 0,
+  level: null }
+------------
+LINE: "                type: bread"
+md23: parsed: type bread
+(same level #1)
+md188: dict { trade_inventory: {}, trades: [], trade: {}, price_stack: {} } ParseLine {
+  line: '                type: bread',
+  head: 'type',
+  val: 'bread',
+  valtype: 'string',
+  indent: 0,
+  level: null }
+------------
+LINE: "                count: 12"
+md23: parsed: count 12
+(same level #1)
+md188: dict { trade_inventory: {},
+  trades: [],
+  trade: {},
+  price_stack: {},
+  type: 'bread' } ParseLine {
+  line: '                count: 12',
+  head: 'count',
+  val: '12',
+  valtype: 'string',
+  indent: 0,
+  level: null }
+------------
+LINE: "            product_stack"
+md23: parsed: product_stack {}
+(same level #1)
+md188: dict { trade_inventory: {},
+  trades: [],
+  trade: {},
+  price_stack: {},
+  type: 'bread',
+  count: '12' } ParseLine {
+  line: '            product_stack',
+  head: 'product_stack',
+  val: {},
+  valtype: 'dict',
+  indent: 0,
+  level: null }
+------------
+LINE: "                type: book"
+md23: parsed: type book
+(same level #1)
+md188: dict { trade_inventory: {},
+  trades: [],
+  trade: {},
+  price_stack: {},
+  type: 'bread',
+  count: '12',
+  product_stack: {} } ParseLine {
+  line: '                type: book',
+  head: 'type',
+  val: 'book',
+  valtype: 'string',
+  indent: 0,
+  level: null }
+------------
+LINE: "                count: 1"
+md23: parsed: count 1
+(same level #1)
+md188: dict { trade_inventory: {},
+  trades: [],
+  trade: {},
+  price_stack: {},
+  type: 'book',
+  count: '12',
+  product_stack: {} } ParseLine {
+  line: '                count: 1',
+  head: 'count',
+  val: '1',
+  valtype: 'string',
+  indent: 0,
+  level: null }
+------------
+LINE: "        trade"
+md23: parsed: trade {}
+(same level #1)
+md188: dict { trade_inventory: {},
+  trades: [],
+  trade: {},
+  price_stack: {},
+  type: 'book',
+  count: '1',
+  product_stack: {} } ParseLine {
+  line: '        trade',
+  head: 'trade',
+  val: {},
+  valtype: 'dict',
+  indent: 0,
+  level: null }
+------------
+LINE: "            price_stack"
+md23: parsed: price_stack {}
+(same level #1)
+md188: dict { trade_inventory: {},
+  trades: [],
+  trade: {},
+  price_stack: {},
+  type: 'book',
+  count: '1',
+  product_stack: {} } ParseLine {
+  line: '            price_stack',
+  head: 'price_stack',
+  val: {},
+  valtype: 'dict',
+  indent: 0,
+  level: null }
+------------
+LINE: "                type: gold_nugget"
+md23: parsed: type gold_nugget
+(same level #1)
+md188: dict { trade_inventory: {},
+  trades: [],
+  trade: {},
+  price_stack: {},
+  type: 'book',
+  count: '1',
+  product_stack: {} } ParseLine {
+  line: '                type: gold_nugget',
+  head: 'type',
+  val: 'gold_nugget',
+  valtype: 'string',
+  indent: 0,
+  level: null }
+------------
+LINE: "                count: 1"
+md23: parsed: count 1
+(same level #1)
+md188: dict { trade_inventory: {},
+  trades: [],
+  trade: {},
+  price_stack: {},
+  type: 'gold_nugget',
+  count: '1',
+  product_stack: {} } ParseLine {
+  line: '                count: 1',
+  head: 'count',
+  val: '1',
+  valtype: 'string',
+  indent: 0,
+  level: null }
+------------
+LINE: "            product_stack  "
+md23: parsed: product_stack {}
+(same level #1)
+md188: dict { trade_inventory: {},
+  trades: [],
+  trade: {},
+  price_stack: {},
+  type: 'gold_nugget',
+  count: '1',
+  product_stack: {} } ParseLine {
+  line: '            product_stack  ',
+  head: 'product_stack',
+  val: {},
+  valtype: 'dict',
+  indent: 0,
+  level: null }
+------------
+LINE: "                type: writable_book"
+md23: parsed: type writable_book
+(same level #1)
+md188: dict { trade_inventory: {},
+  trades: [],
+  trade: {},
+  price_stack: {},
+  type: 'gold_nugget',
+  count: '1',
+  product_stack: {} } ParseLine {
+  line: '                type: writable_book',
+  head: 'type',
+  val: 'writable_book',
+  valtype: 'string',
+  indent: 0,
+  level: null }
+------------
+LINE: "                count: 1"
+md23: parsed: count 1
+(same level #1)
+md188: dict { trade_inventory: {},
+  trades: [],
+  trade: {},
+  price_stack: {},
+  type: 'writable_book',
+  count: '1',
+  product_stack: {} } ParseLine {
+  line: '                count: 1',
+  head: 'count',
+  val: '1',
+  valtype: 'string',
+  indent: 0,
+  level: null }
+SOURCE:
+ trade_inventory
+    trades[]
+        trade
+            price_stack
+                type: bread
+                count: 12
+            product_stack
+                type: book
+                count: 1
+        trade
+            price_stack
+                type: gold_nugget
+                count: 1
+            product_stack  
+                type: writable_book
+                count: 1
+RESULT cmdparts/offers.jd 
+ {
+  "trade_inventory": {},
+  "trades": [],
+  "trade": {},
+  "price_stack": {},
+  "type": "writable_book",
+  "count": "1",
+  "product_stack": {}
+}
