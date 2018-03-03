@@ -14,29 +14,47 @@ else
     dot = DotObject;
 }
 
-const DEBUG=false;
+const DEBUG=true;
 
 class NovemDoc
 {/* This is a browers and node class for handling json data in the
-    Novem Document standards.
+    Novem Document standards. It wraps the structure to provide a minimalist framework
+    for handling it and passing it around.
     
     this.dict = in principle, JSON.serializable, otherwise at developer
     risk for members that serialize.
+    
+    I used 'dict' as a type, meaning a pure serializable javascript object, aka dictionary
     */
-    constructor (initarg)
+    constructor (arg1, arg2)
     {
-        /*
-          { 
-            doctype: string document type
-            // only one should be set
-            json: <json string>,
-            dict: <json serializable object>,
-            dot: <FUTURE table of dot notation list>
-          }
+        /*  argument forms:
+            (0) (): create empty document
+            (1) (string, object): doctype first, and other settings separate
+            (2) (object): doctype in settings.
+            
+            Settings:
+              { 
+                doctype: string document type
+                // only one should be set
+                json: <json string>,
+                dict: <json serializable object>,
+                dot: <FUTURE table of dot notation list>
+              }
         */
+        let initarg;
+        let doctype;
+        if (typeof(arg1) === "string") {
+            doctype = arg1;
+            initarg = arg2;
+        }
         if (!initarg) {
             initarg = {dict:{}};
         }
+        if (doctype) {
+            initarg.doctype = doctype;
+        }
+        
         if (true) console.log("nd37: mkdoc", initarg);
         
         // argument adaptation
@@ -147,9 +165,10 @@ class NovemDoc
      //
     // GENERAL MEMBER FUNCTIONS
      //
-     
+
     has_key(key)
     {
+        console.log('n171:', this.dict);
         var val =  dot.pick(key, this.dict)    ;
         return typeof(val) != "undefined"; 
     }
@@ -185,6 +204,14 @@ class NovemDoc
         return rval;
     }
     
+    push(key, value) {
+        let target = this.get(key);
+        if (target === null) {
+            target = [];
+        }
+        target.push(value);
+    }
+
     remove (key)
     {
         if (DEBUG) 
