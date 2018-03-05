@@ -1,6 +1,8 @@
 "use strict";
 
 var dot = null;
+
+// NovemMongo is lazy loaded below
 var NovemMongo = null;
 
 if (typeof(window) == "undefined")
@@ -12,6 +14,7 @@ else
     // make sure dot-object.js is included
     console.log("Loading NovemDoc in browser...");
     dot = DotObject;
+    //NovemMongo = require('./novem_db/novemmongo');
 }
 
 const DEBUG=true;
@@ -44,14 +47,21 @@ class NovemDoc
         */
         let initarg;
         let doctype;
-        if (typeof(arg1) === "string") {
+        if (typeof(arg1) === "string") 
+        {
             doctype = arg1;
             initarg = arg2;
+        }
+        else
+        {
+            initarg = arg1;
         }
         if (!initarg) {
             initarg = {dict:{}};
         }
         if (doctype) {
+            // if the user passes in doctype, that overwrites whatever
+            // might already be in the dictionary options.
             initarg.doctype = doctype;
         }
         
@@ -227,9 +237,9 @@ class NovemDoc
         this.dict = dict;
     }
     
-    mongo_save(opts)
+    mongoSaveCallback(opts)
     {   /* opts:
-            ready: complete
+            done: complete
         */
         var self = this;
         console.log("nd195: mongo_save",opts);
@@ -246,7 +256,6 @@ class NovemDoc
                             ready: function (err, r)
                                 {
                                     //console.log("nd208: error:", err);
-                                    opts.ready(nmi, err, r);
                                 }
                         });
                     
@@ -260,6 +269,7 @@ class NovemDoc
     {
         
     }
+    
     
 }
 

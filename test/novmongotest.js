@@ -1,24 +1,22 @@
-var NovemMongo = require("../novem_db/novemmongo")
-var NovemDoc = require("../novemdoc.js").NovemDoc;
+var { NovemMongo } = require("../novem_db/novemmongo")
+var { NovemDoc } = require("../novemdoc.js");
 
+const packageLogger =  require("../pkgLogger");
+const log = packageLogger.subLogger('novMongoTest');
 var data = {
     property: "pros",
     name: "first",
     thing: {hello:"goodbye"}
 }
 
-var novem_mongo = new NovemMongo(
-    {
-        ready: function(nmi)
-        {
-            console.log("DAM14:", data);
-            nmi.save_dict(
-                {
-                    collection: "thing",
-                    dict:data,
-                    ready: function (err,r) {nmi.close();}
-                });
-        }
+var novemMongo = NovemMongo.get_instance();
+    
+novemMongo.then((nmi) => {
+        log.log('data: %O', data);
+        return nmi.saveDict({
+            collection: "thing",
+            dict: data,
+        })
     });
     
 
