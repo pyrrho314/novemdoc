@@ -4,7 +4,7 @@
   "description": "Helps with passing JSON style dictionary structures, adds document type system and automatic storage option.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "DEBUG='' jest"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   "devDependencies": {
     "eslint": "3.14.1",
     "eslint-plugin-react": "6.9.0",
+    "jest": "22.4.2",
     "minimist": "1.2.0"
   }
 }
