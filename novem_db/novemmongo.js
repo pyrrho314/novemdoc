@@ -1,6 +1,8 @@
 const _ = require("lodash");
 const packageLogger = require("../pkgLogger");
 const log = packageLogger.subLogger('nmi');
+const config = require('../config');
+
 log.load('novemmongo module')
 
 var single_instances = {};
@@ -22,28 +24,30 @@ class NovemMongo
     
     static get_connection(opts)
     {
+        
+        if (opts && opts.dbname && !opts.ignoreOpts) {
+                throw new Error("Can't use opts if you are not first connection.");
+            }
+        if (!opts) { opts = {} }
         /*
             dbname
             name: name of connection
             ignoreOpts: ignores opts if exists (supports lazy loading)
         */
-        const dbName = opts.dbname ? opts.dbname : "misc";
+        log.detail('get_connection %j', opts)
+        const dbName = opts.dbname ? opts.dbname : config.get('dbname', 'ndoc_db');
+        log.detail('dbName', dbName);
+        opts.dbname = dbName;
+        // feat: named instance so more than one connection is supported through this interface
         const instanceName = opts.name ? opts.name : "default";
-        //
         const ignoreOpts = opts.ignoreOpts ? opts.ignoreOpts : false;
+        
         // set opts that might have defaults (or not)
         opts.name = instanceName;
         let single_instance = single_instances[instanceName]; 
         if (!single_instance) {
             single_instance = new NovemMongo(opts);
             single_instances[instanceName] = single_instance;
-        }
-        else
-        {
-            // @@TODO: warn/err if these opts are different...
-            if (opts && !ignoreOpts) {
-                throw new Error("Can't use opts if you are not first connection.");
-            }
         }
         
         single_instance.incRefCount();
@@ -184,8 +188,16 @@ class NovemMongo
         });
     }
     
-    findDict(opts)
+    findDicts(opts)
     {
+        /* opts:
+            query
+            fields
+            options
+            collection
+        
+            Gets all docs at once... to do add returnCursor to options OR make another function
+        */
         return new Promise((resolve, reject) => {
             const collection = this.mongodb.collection(opts.collection);
             
@@ -207,8 +219,18 @@ class NovemMongo
         });
     }
     
+    findDict(opts) {
+        log.warn('DEPRECATED: findDict, use findDicts');
+        return findDicts(opts);
+    }
+    
     
     findOneDict(opts){
+        /* opts:
+            query - mongo findOne query
+            fields - mongo findOne fields
+            options - mongo findOne options
+        */  
         return new Promise( (resolve, reject) => {
            const collection = this.mongodb.collection(opts.collection);
            collection.findOne(opts.query, opts.fields, opts.options, _fodcb);

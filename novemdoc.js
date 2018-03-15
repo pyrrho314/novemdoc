@@ -3,15 +3,12 @@
 let dot;
 let log;
 let _;
-let config;
 // NovemMongo is lazy loaded below
 var NovemMongo = null;
 
 if (typeof(window) == "undefined")
 { // not windows, assume node
     dot = require("dot-object");
-    config = require('./config');
-    console.log("config", config);
     _ = require('lodash');
     const packageLogger = require('./pkgLogger');
     log = packageLogger.subLogger('doc');
@@ -79,16 +76,16 @@ class NovemDoc
         {
             initarg = arg1;
         }
+        
         if (!initarg) {
             initarg = {dict:{}};
         }
+        
         if (doctype) {
             // if the user passes in doctype, that overwrites whatever
             // might already be in the dictionary options.
             initarg.doctype = doctype;
         }
-        
-        log.detail("nd37: mkdoc %O", initarg);
         
         // argument adaptation
         if (initarg._ndoc) 
@@ -161,9 +158,8 @@ class NovemDoc
      //
     // Special member functions for internal use
      //
-     
-    async getMongo(opts) {
-        if (!opts) { opts = {};}
+    
+    static async _staticGetMongo(opts) {
         // @@D: lazy load on principle
         //  * browser doesn't call
         //  * imagining other database connections
@@ -173,18 +169,33 @@ class NovemDoc
         {
              ({NovemMongo} = require("./novem_db/novemmongo"));
         }
-        if (!opts.dbname) {
-            const dbname = config.get("dbname");
+        //@@TODO: handle error
+        const nmi = await NovemMongo.get_connection(opts);
+        return nmi;
+    }
+    
+    async getMongo(opts) {
+        // @@D: lazy load on principle
+        //  * browser doesn't call
+        //  * imagining other database connections
+        //  * efficient connection use
+        // 
+        if (NovemMongo == null)
+        {
+             ({NovemMongo} = require("./novem_db/novemmongo"));
         }
         //@@TODO: handle error
-        this.novem_mongo = await NovemMongo.get_connection(opts);
-        
+        this.novem_mongo = await NovemDoc._staticGetMongo(opts);
         return this.novem_mongo;
      }
      
+     static async _staticReleaseMongo(novem_mongo) {
+        await novem_mongo.release_connection();
+        return null;
+     }
      async releaseMongo() {
-            await this.novem_mongo.release_connection();
-            this.novem_mongo = null;
+        await NovemDoc._staticReleaseMongo(this.novem_mongo);
+        this.novem_mongo = null;
      }
     
      //
@@ -267,8 +278,8 @@ class NovemDoc
     
     async mongoSave(opts)
     {   
-        log.query("nd195: mongoSave", opts);
-        log.detail("saving", this.dict);
+        log.query("nd273: mongoSave opts %O", opts);
+        log.detail("nd274saving %O", this.dict);
         const nmi = await this.getMongo();
         const answer = await nmi.saveDict(
                         {
@@ -286,9 +297,48 @@ class NovemDoc
         return answer;
     }
     
-    mongoFind( query )
+    static async mongoFindAll( arg )
     {
+        /* arg:
+            doctype     - document type for query (optional but can be used instead of collection)
+            collection  - collection (required but will use doctype if present)
+            query       - passed to mongo find
+            fields      - passed to mongo find
+            option      - passed to mongo find
+            
+        */
+        const {doctype, query={}, fields, options} = arg
+        const nmi = await NovemDoc._staticGetMongo();
+        if (doctype) {
+            _.set(query, '_ndoc.doctype', doctype);
+        }
+        const collection = arg.collection ? arg.collection : doctype;
+        if (!collection) {
+            throw new Error('nd309: Mongo Find, collection not defined')
+        }
+        const result = nmi.findDicts({ collection, query, fields, options });
         
+        NovemDoc._staticReleaseMongo();
+        
+        log.answer("find one result", result );
+        return result;
+    
+    }
+    
+    static async mongoFindOne(arg) 
+    {
+        const {doctype, query={}, fields, options} = arg
+        const nmi = await this.getMongo();
+        if (doctype) {
+            _.set(query, '_ndoc.doctype', doctype);
+            
+        }
+        const result = findOneDict({ query, fields, options });
+        
+        this.releaseMongo();
+        
+        log.answer("find one result", result );
+        return result;
     }
     
     

@@ -7,7 +7,7 @@ const config = {
 
 const configDoc = new NovemDoc({
         doctype: 'config',
-        dict: config}
-        )
+        dict: config,
+        });
 
 module.exports = configDoc;
