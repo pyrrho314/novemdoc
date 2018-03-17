@@ -28,14 +28,35 @@ let NovemMongo, NovemDoc;
         
         const allDocs = await NovemDoc.mongoFindAll(
             {
-                doctype: 'document'    
+                doctype: 'document',
+                returnDicts: false,
             });
             
-        console.log('alldocs', allDocs);
+        console.log('alldocs---------');
+        allDocs.forEach ((item) => {
+            console.log(item.json(true));
+        });
+        console.log('---------alldocs');
         
+        const oneDoc = await NovemDoc.mongoFindOne(
+            {
+                doctype: 'document',
+            });
+        
+        console.log('onedoc----------\n', 
+                    oneDoc.json(true),
+                    '\n----------onedoc');
+                    
         await NovemMongo.close_connections();
     } catch (err) {
         console.log("Doc Mongo Test Error:", err.message, err.stack);
-        await NovemMongo.close_connection();
+        await NovemMongo.close_connections();
     }
-})();
+})().catch( async (err) => {
+    console.log("----------------");
+    console.log("Error:", err.message);
+    console.log("----------------");
+    console.log(err.stack);
+    await NovemMongo.close_connections();
+    
+});

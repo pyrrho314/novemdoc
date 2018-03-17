@@ -276,6 +276,14 @@ class NovemDoc
         dot.remove(key, this.dict);
     }
     
+    toString(opts) {
+        return this.json(true);
+    }
+    
+    toSource(opts) {
+        return this.json(true);
+    }
+    
     async mongoSave(opts)
     {   
         log.query("nd273: mongoSave opts %O", opts);
@@ -305,9 +313,9 @@ class NovemDoc
             query       - passed to mongo find
             fields      - passed to mongo find
             option      - passed to mongo find
-            
+            returnDicts - return dict instead of NovemDoc
         */
-        const {doctype, query={}, fields, options} = arg
+        const {doctype, query={}, fields, options, returnDicts = false} = arg
         const nmi = await NovemDoc._staticGetMongo();
         if (doctype) {
             _.set(query, '_ndoc.doctype', doctype);
@@ -316,28 +324,50 @@ class NovemDoc
         if (!collection) {
             throw new Error('nd309: Mongo Find, collection not defined')
         }
-        const result = nmi.findDicts({ collection, query, fields, options });
+        let result = await nmi.findDicts({ collection, query, fields, options });
         
-        NovemDoc._staticReleaseMongo();
+        NovemDoc._staticReleaseMongo(nmi);
         
-        log.answer("find one result", result );
+        log.answer("find many result", result );
+        if (!returnDicts) {
+            result = result.map( (item) => {
+                const rdoc = NovemDoc.from_dict(item)
+                rdoc.set('_ndoc.mongo.collection', collection);
+                if (!doctype) 
+                {
+                    doctype = collection;
+                    rdoc.doctype = doctype;
+                }
+                return rdoc;
+            })
+        }
         return result;
     
     }
     
     static async mongoFindOne(arg) 
     {
-        const {doctype, query={}, fields, options} = arg
-        const nmi = await this.getMongo();
+        let {doctype, collection, query={}, fields, options, returnDict=false} = arg
+        const nmi = await  NovemDoc._staticGetMongo();
         if (doctype) {
             _.set(query, '_ndoc.doctype', doctype);
-            
         }
-        const result = findOneDict({ query, fields, options });
+        collection = collection ? collection : doctype;
+        let result =  await nmi.findOneDict({ collection, query, fields, options });
         
-        this.releaseMongo();
+        NovemDoc._staticReleaseMongo(nmi);
         
         log.answer("find one result", result );
+        if (!returnDict) {
+            const rdoc = NovemDoc.from_dict(result)
+            rdoc.set('_ndoc.mongo.collection', collection);
+            if (!doctype) 
+            {
+                doctype = collection;
+                rdoc.doctype = doctype;
+            }
+            result = rdoc;
+        }
         return result;
     }
     
