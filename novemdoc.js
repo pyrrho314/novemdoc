@@ -216,7 +216,6 @@ class NovemDoc
     
     has_key(key)
     {
-        console.log('n171:', this.dict);
         var val =  dot.pick(key, this.dict)    ;
         return typeof(val) != "undefined"; 
     }

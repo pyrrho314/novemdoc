@@ -26,6 +26,12 @@ class DogLogger {
     if(!args) {
       args = {};
     }
+    
+    this.logFilter = process.env.DOGFILTER;
+    if (this.logFilter) {
+      makeLoggerFunction.enable(this.logFilter);
+    }
+    
     this.logChannels = _logChannels; // FUTURE?: pass in custom channes per logger?
     const logChannels = this.logChannels;
     if(!unitTag) {
