@@ -1,36 +1,62 @@
-var NovemMongo = require("../novem_db/novemmongo")
-var NovemDoc = require("../novemdoc.js").NovemDoc;
+// requires node
+// must be called before anyone loads NovemMongo
+const novemDocConfig = require('../config');
+novemDocConfig.set('dbname', 'test');
 
-var data = {
-    property: "pros",
-    name: "first",
-    thing: {hello:"goodbye"}
-}
-
-var novem_mongo = new NovemMongo(
-    {
-        ready: function(nmi)
-        {
-            console.log("DAM14: Mongo Loaded");
-            /*
-            nmi.save_dict(
-                {
-                    collection: "thing",
-                    dict:data
-                });
-            */
+let NovemMongo, NovemDoc;
+(async () => {
+    try {
+        ({NovemMongo} = require('../novem_db/novemmongo.js'));
+        ({NovemDoc} = require("../novemdoc.js"));
+        
+        var data = {
+            property: "pros",
+            name: "first",
+            thing: {hello:"goodbye"},
+            timestamp: new Date(),
         }
-    });
-
-var nd = new NovemDoc({
-                        doctype: "thing",
-                        dict: data
-                      });
-                      
-nd.mongo_save(
-        {
-            ready: function (nmi)
-                {
-                    nmi.close();
-                }
+        
+        console.log('create novemdoc')
+        var nd = new NovemDoc({
+                                doctype: "document",
+                                dict: data
+                              });
+        
+        const answer = await nd.mongoSave();
+        
+        console.log('saved', answer);
+        
+        const allDocs = await NovemDoc.mongoFindAll(
+            {
+                doctype: 'document',
+                returnDicts: false,
+            });
+            
+        console.log('alldocs---------');
+        allDocs.forEach ((item) => {
+            console.log(item.json(true));
         });
+        console.log('---------alldocs');
+        
+        const oneDoc = await NovemDoc.mongoFindOne(
+            {
+                doctype: 'document',
+            });
+        
+        console.log('onedoc----------\n', 
+                    oneDoc.json(true),
+                    '\n----------onedoc');
+                    
+        await NovemMongo.close_connections();
+    } catch (err) {
+        console.log("Doc Mongo Test Error:", err.message, err.stack);
+        await NovemMongo.close_connections();
+    }
+})().catch( async (err) => {
+    console.log("----------------");
+    console.log("Error:", err.message);
+    console.log("----------------");
+    console.log(err.stack);
+    await NovemMongo.close_connections();
+    
+});

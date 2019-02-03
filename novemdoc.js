@@ -1,17 +1,27 @@
 "use strict";
 
-var dot = null;
+let dot;
+let log;
+let _;
+// NovemMongo is lazy loaded below
 var NovemMongo = null;
 
 if (typeof(window) == "undefined")
 { // not windows, assume node
     dot = require("dot-object");
+    _ = require('lodash');
+    const packageLogger = require('./pkgLogger');
+    log = packageLogger.subLogger('doc');
 }
 else
 {
     // make sure dot-object.js is included
     console.log("Loading NovemDoc in browser...");
     dot = DotObject;
+    //NovemMongo = require('./novem_db/novemmongo');
+    //@@PLAN: support logger in browser
+    // log = something
+    throw new Error('no logger or lodash support in browser at moment!');
 }
 
 const DEBUG=true;
@@ -21,10 +31,23 @@ class NovemDoc
     Novem Document standards. It wraps the structure to provide a minimalist framework
     for handling it and passing it around.
     
-    this.dict = in principle, JSON.serializable, otherwise at developer
-    risk for members that serialize.
+    this.dict = in principle, JSON.serializable.
     
-    I used 'dict' as a type, meaning a pure serializable javascript object, aka dictionary
+    The primary purpose is to wrap a JSON serializable object allowing the dictionary to be
+    used as a representation of the class. It:
+        1. allows setting and getting and pushing elements with dot notation
+        2. allows saving to DB (currently MongoDB)
+        3. allows taking the dictionary and recreating as desired.
+        
+    Features from past examples:
+        1. document decomposition/recomposition (todo)
+        2. serialize to XML (???)
+        3. export document as dot-property list
+        4. support transformations through the dot-property key mapping (dot-object does this iirc)
+    
+    Features excluded:
+        * not a general interface to Mongo. It doesn't hide mongo, it plays well with it.
+            This should be the case with any future database adapter.
     */
     constructor (arg1, arg2)
     {
@@ -44,18 +67,25 @@ class NovemDoc
         */
         let initarg;
         let doctype;
-        if (typeof(arg1) === "string") {
+        if (typeof(arg1) === "string") 
+        {
             doctype = arg1;
             initarg = arg2;
         }
+        else
+        {
+            initarg = arg1;
+        }
+        
         if (!initarg) {
             initarg = {dict:{}};
         }
+        
         if (doctype) {
+            // if the user passes in doctype, that overwrites whatever
+            // might already be in the dictionary options.
             initarg.doctype = doctype;
         }
-        
-        if (true) console.log("nd37: mkdoc", initarg);
         
         // argument adaptation
         if (initarg._ndoc) 
@@ -121,51 +151,69 @@ class NovemDoc
         this.set("_ndoc.doctype", val);
     }
     
+    // @@Future: have getter/setter for dict to, e.g., enforce readonly or trigger
+    // subscription event, which is in particular also not implemented yet.
+    
+    //  
      //
     // Special member functions for internal use
      //
+    
+    static async _staticGetMongo(opts) {
+        // @@D: lazy load on principle
+        //  * browser doesn't call
+        //  * imagining other database connections
+        //  * efficient connection use
+        // 
+        if (NovemMongo == null)
+        {
+             ({NovemMongo} = require("./novem_db/novemmongo"));
+        }
+        //@@TODO: handle error
+        const nmi = await NovemMongo.get_connection(opts);
+        return nmi;
+    }
+    
+    async getMongo(opts) {
+        // @@D: lazy load on principle
+        //  * browser doesn't call
+        //  * imagining other database connections
+        //  * efficient connection use
+        // 
+        if (NovemMongo == null)
+        {
+             ({NovemMongo} = require("./novem_db/novemmongo"));
+        }
+        //@@TODO: handle error
+        this.novem_mongo = await NovemDoc._staticGetMongo(opts);
+        return this.novem_mongo;
+     }
      
-    get_mongo(opts){
-        var self=this;
-        if (!opts) { opts = {};}
-        console.log("get_mongo");
-        if (NovemMongo == null || this.novem_mongo == null)
-        {
-             NovemMongo = require("./novem_db/novemmongo");
-        }
-        
-        
-        if (this.novem_mongo == null)
-        {
-            //console.log("no novem_mongo instance");
-            NovemMongo.get_instance({
-                ready: function(nmi)
-                {
-                    self.novem_mongo = nmi;
-                    if (opts.ready)
-                    {
-                        console.log("calling get_mongo cb");
-                        opts.ready(nmi);
-                    }
-                }
-            });
-        }
-        else
-        {
-            //console.log("no novem_mongo instance");
-            if (opts.ready)
-            {
-                console.log("calling get_mongo cb");
-                opts.ready(this.novem_mongo);
-            }
-        }
-        return NovemMongo
+     static async _staticReleaseMongo(novem_mongo) {
+        await novem_mongo.release_connection();
+        return null;
+     }
+     async releaseMongo() {
+        await NovemDoc._staticReleaseMongo(this.novem_mongo);
+        this.novem_mongo = null;
      }
     
      //
     // GENERAL MEMBER FUNCTIONS
      //
 
+    difference(object) {
+        const base = this.dict;
+    	function changes(object, base) {
+    		return _.transform(object, function(result, value, key) {
+    		    if (!_.isEqual(value, base[key])) {
+    				result[key] = (_.isObject(value) && _.isObject(base[key])) ? changes(value, base[key]) : value;
+    			}
+    		});
+    	}
+    	return changes(object, base);
+    }
+    
     has_key(key)
     {
         console.log('n171:', this.dict);
@@ -193,7 +241,6 @@ class NovemDoc
     
     set(key, value)
     {
-        if (DEBUG) console.log(`set: ${key}=${value}`);
         dot.set(key, value, this.dict);
     }
     
@@ -204,7 +251,6 @@ class NovemDoc
             def = null;
         }
         var rval = dot.pick(key, this.dict);
-        if (DEBUG) console.log(`get: ${key}==${rval}`);
         if (!rval) { rval = def }
         return rval;
     }
@@ -215,6 +261,14 @@ class NovemDoc
             target = [];
         }
         target.push(value);
+    }
+    
+    pop(key, value) {
+        let target = this.get(key);
+        if (target === null) {
+            return null;
+        }
+        return target.pop();
     }
 
     remove (key)
@@ -227,55 +281,113 @@ class NovemDoc
         dot.remove(key, this.dict);
     }
     
-    set_dict(dict)
-    {
-        this.dict = dict;
+    toString(opts) {
+        return this.json(true);
     }
     
-    mongo_save(opts)
-    {   /* opts:
-            ready: complete
-        */
-        var self = this;
-        console.log("nd195: mongo_save",opts);
-        this.get_mongo(
-            {
-                ready: function (nmi)
-                {
-                    console.log("u43: ready with doctype", self.doctype);
-                    
-                    nmi.save_dict(
+    toSource(opts) {
+        return this.json(true);
+    }
+    
+    async mongoSave(opts)
+    {   
+        log.query("nd273: mongoSave opts %O", opts);
+        log.detail("nd274saving %O", this.dict);
+        const nmi = await this.getMongo();
+        const answer = await nmi.saveDict(
                         {
-                            collection: self.doctype,
-                            dict: self.dict,
-                            ready: function (err, r)
-                                {
-                                    //console.log("nd208: error:", err);
-                                    opts.ready(nmi, err, r);
-                                }
+                            collection: this.doctype,
+                            dict: this.dict,
                         });
-                    
-                  
-                }
-            });
-
+        this.releaseMongo();
+        log.detail("save answer: %j", answer);
+        const savedDoc = answer.savedDoc;
+        // @@PLAN: this doesn't play well with serializeable members of the dict
+        //  as they will be converted to thier serialization.
+        //  Need to parse and turn these into object at least in the case of nested
+        //  NovemDoc instances, which can be detected by the _ndoc annotation.
+        this.dict = savedDoc;
+        return answer;
     }
     
-    mongo_find( query )
+    static async mongoFindAll( arg )
     {
+        /* arg:
+            doctype     - document type for query (optional but can be used instead of collection)
+            collection  - collection (required but will use doctype if present)
+            query       - passed to mongo find
+            fields      - passed to mongo find
+            option      - passed to mongo find
+            returnDicts - return dict instead of NovemDoc
+        */
+        const {doctype, query={}, fields, options, returnDicts = false} = arg
+        const nmi = await NovemDoc._staticGetMongo();
+        if (doctype) {
+            _.set(query, '_ndoc.doctype', doctype);
+        }
+        const collection = arg.collection ? arg.collection : doctype;
+        if (!collection) {
+            throw new Error('nd309: Mongo Find, collection not defined')
+        }
+        let result = await nmi.findDicts({ collection, query, fields, options });
         
+        NovemDoc._staticReleaseMongo(nmi);
+        
+        log.answer("find many result", result );
+        if (!returnDicts) {
+            result = result.map( (item) => {
+                const rdoc = NovemDoc.from_dict(item)
+                rdoc.set('_ndoc.mongo.collection', collection);
+                if (!doctype) 
+                {
+                    doctype = collection;
+                    rdoc.doctype = doctype;
+                }
+                return rdoc;
+            })
+        }
+        return result;
+    
     }
+    
+    static async mongoFindOne(arg) 
+    {
+        let {doctype, collection, query={}, fields, options, returnDict=false} = arg
+        const nmi = await  NovemDoc._staticGetMongo();
+        if (doctype) {
+            _.set(query, '_ndoc.doctype', doctype);
+        }
+        collection = collection ? collection : doctype;
+        let result =  await nmi.findOneDict({ collection, query, fields, options });
+        
+        NovemDoc._staticReleaseMongo(nmi);
+        
+        log.answer("find one result", result );
+        if (!returnDict) {
+            const rdoc = NovemDoc.from_dict(result)
+            rdoc.set('_ndoc.mongo.collection', collection);
+            if (!doctype) 
+            {
+                doctype = collection;
+                rdoc.doctype = doctype;
+            }
+            result = rdoc;
+        }
+        return result;
+    }
+    
     
 }
 
 if (typeof(window) == "undefined")
 { 
     module.exports = {
-    NovemDoc : NovemDoc
+    NovemDoc,
     }
     // not windows, assume node
-    // then NovemDoc will be globally declared,
+    
 }
 else
 {
+    // NovemDoc currently declared in global scope otherwise
 }
