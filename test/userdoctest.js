@@ -1,6 +1,8 @@
-const NovemMongo = require("../novem_db/novemmongo")
+const NovemMongo = require("../novem_db/novemmongo").NovemMongo;
 const NovemDoc = require("../novemdoc.js").NovemDoc;
 const bcrypt = require("bcrypt-nodejs");
+
+console.log("NovemMongo", NovemMongo);
 
 var user = { 
         username: 'callen314@gmail.com', 

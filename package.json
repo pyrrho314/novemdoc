@@ -4,7 +4,8 @@
   "description": "Helps with passing JSON style dictionary structures, adds document type system and automatic storage option.",
   "main": "index.js",
   "scripts": {
-    "test": "DEBUG='' jest"
+    "test": "DEBUG='' jest",
+    "list_links": "npm ls -g --depth=0 --link=true"
   },
   "repository": {
     "type": "git",

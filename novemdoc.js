@@ -8,6 +8,7 @@ var NovemMongo = null;
 
 if (typeof(window) == "undefined")
 { // not windows, assume node
+    console.log("Loading NovemDoc in node backend...");
     dot = require("dot-object");
     _ = require('lodash');
     const packageLogger = require('./pkgLogger');
@@ -15,19 +16,21 @@ if (typeof(window) == "undefined")
 }
 else
 {
+    // babel options, no babel version not avail for browser now
     // make sure dot-object.js is included
     console.log("Loading NovemDoc in browser...");
-    dot = DotObject;
+    dot = require("dot-object");
+    _ = require('lodash');
     //NovemMongo = require('./novem_db/novemmongo');
     //@@PLAN: support logger in browser
     // log = something
-    throw new Error('no logger or lodash support in browser at moment!');
+    //throw new Error('no logger or lodash support in browser at moment!');
 }
 
 const DEBUG=true;
 
 class NovemDoc
-{/* This is a browers and node class for handling json data in the
+{/* This is a brower and node class for handling json data in the
     Novem Document standards. It wraps the structure to provide a minimalist framework
     for handling it and passing it around.
     
@@ -167,7 +170,13 @@ class NovemDoc
         // 
         if (NovemMongo == null)
         {
-             ({NovemMongo} = require("./novem_db/novemmongo"));
+            if (typeof window === 'undefined') {
+                // trick so webpack doesn't follow server only dependencies
+                // but still can be required
+               ({NovemMongo} = eval('require')("./novem_db/novemmongo"));
+            } else {
+                // windows only
+            }
         }
         //@@TODO: handle error
         const nmi = await NovemMongo.get_connection(opts);
@@ -182,7 +191,9 @@ class NovemDoc
         // 
         if (NovemMongo == null)
         {
-             ({NovemMongo} = require("./novem_db/novemmongo"));
+            // trick so webpack doesn't follow server only dependencies
+            // but still can be required
+            ({NovemMongo} = eval('require')("./novem_db/novemmongo"));
         }
         //@@TODO: handle error
         this.novem_mongo = await NovemDoc._staticGetMongo(opts);
@@ -379,15 +390,16 @@ class NovemDoc
     
 }
 
-if (typeof(window) == "undefined")
+if (typeof(window) === "undefined")
 { 
-    module.exports = {
-    NovemDoc,
-    }
+    console.log("here");
+    exports.NovemDoc = NovemDoc;
     // not windows, assume node
-    
 }
 else
 {
-    // NovemDoc currently declared in global scope otherwise
+    // then we require anyway for babel... sigh
+    exports.NovemDoc  = NovemDoc;
 }
+
+console.log("nd400: exports", module.exports);

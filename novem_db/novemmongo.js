@@ -14,7 +14,7 @@ class NovemMongo
     constructor(opts)
     {
         this.refCount = 0;
-        log.load('Creating NovemMongo instance');
+        log.load('Creating NovemMongo instance', opts);
         if (!opts) { opts = {} }
         this.mongodb = null;
         this.awaiting_ready = [];
