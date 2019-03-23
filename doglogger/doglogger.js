@@ -16,6 +16,7 @@ const _logChannels = [
   { channel: 'query', color: 43},
   { channel: 'answer', color: 43},
   { channel: 'info', color: 230},
+  { channel: 'stats', color: 321},
   { channel: 'debug', color: 200},
   { channel: 'detail', color: 119},
   { channel: 'warn', color: 202},
@@ -26,12 +27,14 @@ class DogLogger {
     if(!args) {
       args = {};
     }
-    
+
+    this.dbgFragments = [];
+
     this.logFilter = process.env.DOGFILTER;
     if (this.logFilter) {
       makeLoggerFunction.enable(this.logFilter);
     }
-    
+
     this.logChannels = _logChannels; // FUTURE?: pass in custom channes per logger?
     const logChannels = this.logChannels;
     if(!unitTag) {
@@ -50,13 +53,13 @@ class DogLogger {
       } else { // assumed string @@todo: validate
         channel = channelArg;
       }
-      
+
       // do alignment making namespaces all equal length
       const largestChannelSpace = '      '; // six letter word
       const justify = 'right'; // 'right' or 'left'
       const padding = largestChannelSpace.slice(channel.length);
       let channelTag = `${channel}:${unitTag}`;
-      
+
       switch (justify) {
         case 'left':
           channelTag = channelTag + padding;
@@ -65,7 +68,7 @@ class DogLogger {
           channelTag = padding + channelTag;
           break;
       }
-      
+
       const channelLogFunction = makeLoggerFunction(channelTag);
       if(color) {
         channelLogFunction.color = color;
@@ -84,16 +87,16 @@ class DogLogger {
       return {channel, color};
     });
   }
-  
+
   subLogger(unitTag, args) {
     const augTag = `${this.unitTag}:${unitTag}`;
     return new DogLogger(augTag, args);
   }
-  
+
   log(channel, ...logargs) {
     if (this[channel]) {
       this[channel](...logargs);
-    } 
+    }
     else
     {
       if (logargs.length > 1) {
@@ -101,6 +104,18 @@ class DogLogger {
       }
       this.info(...logargs);
     }
+  }
+
+  setDebug(debugmask) {
+      if (debugmask) {
+          makeLoggerFunction.enable(debugmask);
+      } else {
+          makeLoggerFunction.disable();
+      }
+  }
+  addDebug(debugmask) {
+      this.dbgFragments.push(debugmask);
+      this.setDebug(this.dbgFragments.join(","));
   }
 }
 

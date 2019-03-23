@@ -65,7 +65,7 @@ class NovemDoc
                 // only one should be set
                 json: <json string>,
                 dict: <json serializable object>,
-                dot: <FUTURE table of dot notation list>
+                dotSchema: <FUTURE table of dot notation list>
               }
         */
         let initarg;
@@ -227,9 +227,13 @@ class NovemDoc
     
     has_key(key)
     {
-        console.log('n171:', this.dict);
-        var val =  dot.pick(key, this.dict)    ;
+        var val =  dot.pick(key, this.dict);
         return typeof(val) != "undefined"; 
+    }
+    
+    keys() 
+    {
+        return Object.keys(this.dict);
     }
     
     json(pretty){
@@ -248,6 +252,16 @@ class NovemDoc
     toJSON(arg) {
         console.log('nd190:', arg)
         return this.json();
+    }
+    
+    meta(key, value) {
+        // get/set meta data
+        const hasValue  = arguments.length >= 2;
+        if (!hasValue) {
+            return this.get(`_ndoc.${key}`);
+        } else {
+            this.set(`_ndoc.${key}`, value);
+        }
     }
     
     set(key, value)
@@ -287,7 +301,7 @@ class NovemDoc
         if (DEBUG) 
         {
             var oval = dot.pick(key, this.dict); // could remove with this
-            console.log(`remove: ${key} was: ${oval}`);
+            log.detail(`remove: ${key} was: ${oval}`);
         }
         dot.remove(key, this.dict);
     }
@@ -300,6 +314,48 @@ class NovemDoc
         return this.json(true);
     }
     
+    /////
+    //
+    // Documents Composition and Decomposition
+    //
+    getSubdoc(key, opts) {
+        /* opts:
+            addRecompose
+        */
+        if (!opts)  opts = {};
+        opts = _.defaultsDeep(opts, {
+            addRecompose: false,
+            addDoctype: true,
+        });
+        const subdict = this.get(key);
+        // check if object
+        const isObject = subdict instanceof Object;
+        const isArray  = subdict instanceof Array;
+        
+        if (!isObject || isArray) {
+            // no document to return
+            return null;
+        }
+        
+        // wrap in novemdoc
+        const rdoc = new NovemDoc({dict:subdict});
+        
+        // optionally add recomposition information
+        if (opts.addRecompose) {
+            rdoc.meta("subdoc.fromKey", key);
+        }
+        
+        // return subdocument: note it's pointing directly into this document!
+        return rdoc;
+        
+    }
+    
+    
+    /////
+    //
+    // Mongo related calls, here for convienience... should migrate to data store plugin base
+    //  on the Mongo novemmongo.js
+    // 
     async mongoSave(opts)
     {   
         log.query("nd273: mongoSave opts %O", opts);
@@ -392,7 +448,6 @@ class NovemDoc
 
 if (typeof(window) === "undefined")
 { 
-    console.log("here");
     exports.NovemDoc = NovemDoc;
     // not windows, assume node
 }
@@ -401,5 +456,3 @@ else
     // then we require anyway for babel... sigh
     exports.NovemDoc  = NovemDoc;
 }
-
-console.log("nd400: exports", module.exports);
