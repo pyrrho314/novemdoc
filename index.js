@@ -1,4 +1,3 @@
-console.log("importing novemdoc/index.js")
 exports.novemdoc_module = require("./novemdoc");
 exports.novemdoc_config_module = require('./config');
 exports.NovemDoc = exports.novemdoc_module.NovemDoc;
@@ -13,4 +12,3 @@ if (typeof window === 'undefined') {
 
 //exports.complexdoc_module = require("./complexdoc");
 //exports.ComplexDoc = exports.complexdoc_module.ComplexDoc;
-

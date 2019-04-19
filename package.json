@@ -19,6 +19,7 @@
   "homepage": "https://github.com/pyrrho314/novemdoc#readme",
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
+    "chalk": "2.4.2",
     "debug": "3.1.0",
     "dot-object": "1.5.4",
     "lodash": "4.17.4",

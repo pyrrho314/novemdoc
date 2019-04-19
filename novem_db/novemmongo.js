@@ -6,9 +6,9 @@ const config = require('../config');
 log.load('novemmongo module')
 
 var single_instances = {};
-    
+
 var { MongoClient, ObjectID} = require("mongodb");
-        
+
 class NovemMongo
 {
     constructor(opts)
@@ -19,13 +19,14 @@ class NovemMongo
         this.mongodb = null;
         this.awaiting_ready = [];
         this.dbname = opts.dbname ?  opts.dbname : 'misc';
-        this.opts = opts;
+        this.opts = Object.assign({}, opts);
     }
-    
+
     static get_connection(opts)
     {
-        
+        // why was this here?!?
         if (opts && opts.dbname && !opts.ignoreOpts) {
+                log.error("Error, opts:", opts);
                 throw new Error("Can't use opts if you are not first connection.");
             }
         if (!opts) { opts = {} }
@@ -34,40 +35,44 @@ class NovemMongo
             name: name of connection
             ignoreOpts: ignores opts if exists (supports lazy loading)
         */
-        log.detail('get_connection %j', opts)
+        log.detail('get_connection %j', opts);
+        log.dump("config right now:", config.dict)
         const dbName = opts.dbname ? opts.dbname : config.get('dbname', 'ndoc_db');
         log.detail('dbName', dbName);
         opts.dbname = dbName;
-        // feat: named instance so more than one connection is supported through this interface
-        const instanceName = opts.name ? opts.name : "default";
+        opts.host = opts.host ? opts.host             : config.get("host");
+        opts.username = opts.username ? opts.username     : config.get("username");
+        opts.password = opts.password ? opts.password : config.get("password");        // feat: named instance so more than one connection is supported through this interface
+        const instanceName = opts.name ? opts.name    : "default";
         const ignoreOpts = opts.ignoreOpts ? opts.ignoreOpts : false;
-        
+
         // set opts that might have defaults (or not)
         opts.name = instanceName;
-        let single_instance = single_instances[instanceName]; 
+        let single_instance = single_instances[instanceName];
         if (!single_instance) {
             single_instance = new NovemMongo(opts);
             single_instances[instanceName] = single_instance;
         }
-        
+
         single_instance.incRefCount();
-        
+
         return new Promise( (resolve, reject) => {
             if (!opts) {opts = {};}
             log.log('init', 'nm26: single instance present');
-            if (single_instance.mongodb) 
+            if (single_instance.mongodb)
             {
                 log.op('return novem mongo instance');
                 resolve(single_instance);
             }
             else
             {
+                /// MAKE CONNECTION
                 log.query('connect to mongo');
                 resolve(single_instance.initiate());
             }
         });
     }
-    
+
     static async close_connections() {
         // close all connections
         for (let instanceName in single_instances) {
@@ -75,7 +80,7 @@ class NovemMongo
             delete single_instances[instanceName];
         }
     }
-    
+
     async release_connection() {
         this.decRefCount();
         // works with static members
@@ -88,29 +93,30 @@ class NovemMongo
             delete single_instances[instanceName];
         }
     }
-    
-    
-    
+
+
+
     // can be used by callers to track shared use
     incRefCount() {
         this.refCount += 1;
     }
-    
+
     decRefCount() {
         this.refCount -= 1;
     }
-    
+
     // INSTANCE MEMBERS
-    
+
     close()
     {
         this.mongodb.close();
     }
-    
+
+    // MAKE THE CONNECTION
     initiate(opts)
     {
-        //@@PLAN: use novemDoc for config system, load hardcodes from there.
         if (!opts) opts = {};
+        log.dump("initiate() opts", opts, log.debug);
         const dbname = this.dbname;
         return new Promise( (resolve, reject ) => {
             // used to create singletone
@@ -118,12 +124,22 @@ class NovemMongo
             // use static get_instance
             log.init("nm67:Initiating Mongo Connection and NovemMongo instance");
             var mongourl = opts.mongo_url;
-            
-            if (!mongourl) 
+
+            if (!mongourl)
             {
-                mongourl =  `mongodb://localhost:27017/${this.dbname}`;
+                log.dump("build url from this.opts", this.opts);
+                let userpart;
+                if (this.opts.username) {
+                    userpart = `${this.opts.username}:${this.opts.password}@`;
+                }
+                else {
+                    userpart = '';
+                }
+
+                mongourl =  `mongodb://${userpart}${this.opts.host}/admin`;
+                log.debug("mongourl", mongourl);
             }
-        
+
             var mongodb = null;
             const self = this;
             MongoClient.connect(mongourl, function(err, db)
@@ -145,7 +161,7 @@ class NovemMongo
             });
         });
     }
-    
+
     signalReady ()
     {
         for (var i in this.awaiting_ready)
@@ -155,13 +171,13 @@ class NovemMongo
         }
         this.awaiting_ready = [];
     }
-    
+
     saveDict(opts)
-    {   /* 
+    {   /*
             opts:
                 dict: the data object, Mongo Serializable
                 collection: string name of collection
-            
+
             returns Promise
         */
         return new Promise( (resolve, reject) => {
@@ -173,7 +189,7 @@ class NovemMongo
             collection.save( theDict, function(err, r)
             {
                 log.op(`nm127: dict saved to ${opts.collection}`);
-                if (err) 
+                if (err)
                 {
                     reject(err);
                 } else
@@ -187,7 +203,7 @@ class NovemMongo
             });
         });
     }
-    
+
     findDicts(opts)
     {
         /* opts:
@@ -195,14 +211,14 @@ class NovemMongo
             fields
             options
             collection
-        
+
             Gets all docs at once... to do add returnCursor to options OR make another function
         */
         return new Promise((resolve, reject) => {
             const collection = this.mongodb.collection(opts.collection);
-            
+
             collection.find(opts.query, opts.fields, opts.options, _fdcb);
-            
+
             function _fdcb(err, cursor)
             {
                 if (err)
@@ -218,19 +234,19 @@ class NovemMongo
             }
         });
     }
-    
+
     findDict(opts) {
         log.warn('DEPRECATED: findDict, use findDicts');
         return findDicts(opts);
     }
-    
-    
+
+
     findOneDict(opts){
         /* opts:
             query - mongo findOne query
             fields - mongo findOne fields
             options - mongo findOne options
-        */  
+        */
         return new Promise( (resolve, reject) => {
            const collection = this.mongodb.collection(opts.collection);
            collection.findOne(opts.query, opts.fields, opts.options, _fodcb);

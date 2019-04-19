@@ -2,7 +2,7 @@ const { NovemDoc } = require('./novemdoc');
 
 const config = {
     dbname: 'misc',
-    host: 'mongodb://localhost:27017',
+    host: 'localhost:27017',
 }
 
 const configDoc = new NovemDoc({
