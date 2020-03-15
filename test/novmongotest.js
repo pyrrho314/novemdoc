@@ -1,3 +1,11 @@
+/*
+
+OUT OF ORDER! Needs repair, see docmongotest for higher order example
+
+*/
+
+
+
 var { NovemMongo } = require("../novem_db/novemmongo")
 var { NovemDoc } = require("../novemdoc.js");
 
@@ -20,7 +28,7 @@ const testDb = 'test';
         collection: testCollection,
         dict: {...data, madeBy:"async"},
     });
-    
+
     // saved doc is returned, can have id in it, or otherwise be annoted
     log.info("saved as returned %O\n", answer);
     const savedId = answer.savedDoc._id;
@@ -29,7 +37,7 @@ const testDb = 'test';
         query: {},
     })
     log.info("fetched %d docs in collection %s.%s", fetchedDocs.length, testDb, testCollection);
-    
+
     log.info("id", savedId);
     const fetchedDoc = await nmi.findOneDict({
         collection: testCollection,

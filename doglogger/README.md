@@ -1,6 +1,6 @@
 # `doglogger`
 
-Thin Logger arount lightweight category-based logger `debug`. 
+Thin Logger around lightweight category-based logger `debug`. 
 
 ## Filtering output
 
