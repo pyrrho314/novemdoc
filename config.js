@@ -1,8 +1,22 @@
 const { NovemDoc } = require('./novemdoc');
+const defaultsDeep = require('lodash/defaultsDeep')
 
-const config = {
+let localConfig = null;
+try {
+    localConfig = require('./local.novemdoc.config.js');
+    console.log("config7: localConfig", localConfig);
+} catch (error){
+    // there is no local config
+    throw error;
+}
+
+let config = {
     dbname: 'misc',
     host: 'localhost:27017',
+}
+
+if (localConfig) {
+    config = defaultsDeep(localConfig, config);
 }
 
 const configDoc = new NovemDoc({
