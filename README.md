@@ -26,7 +26,7 @@ in terms of nested maps and lists), the NovemDoc is as follows in practice:
   metadata, such as the doctype).
 * uses dot notation to set and get properties
 * while the NovemDoc object adds convienience to handling the dict, and subclasses
-  can further proxy properties that are stored in the dict, and any 
+  can further proxy properties that are stored in the dict, and any
   object oriented feature can be added, focus on the nested dict means this
   class plays well with code that handles the JSON object directly.
 
@@ -51,3 +51,7 @@ I've done in such classes:
 Other things:
 
 * graph db and graphql support
+
+### Debugging/Logging
+
+To get verbose logging set DEBUG=* (or other mask to filter particular log messages).

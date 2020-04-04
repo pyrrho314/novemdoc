@@ -4,7 +4,7 @@ const defaultsDeep = require('lodash/defaultsDeep')
 let localConfig = null;
 try {
     localConfig = require('./local.novemdoc.config.js');
-    console.log("config7: localConfig", localConfig);
+    // never leave on, secret info:console.log("config7: localConfig", localConfig);
 } catch (error){
     // there is no local config
     throw error;
