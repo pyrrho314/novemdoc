@@ -27,11 +27,11 @@ let NovemMongo, NovemDoc;
 
         const answer = await nd.mongoSave();
 
-        console.log('saved', answer);
+        console.log('dmt30: saved', answer);
 
         const allDocs = await NovemDoc.mongoFindAll(
             {
-                doctype: 'document',
+                doctype: 'testDocument',
                 returnDicts: false,
             });
 

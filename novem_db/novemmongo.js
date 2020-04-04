@@ -14,7 +14,8 @@ class NovemMongo
     constructor(opts)
     {
         this.refCount = 0;
-        log.load('Creating NovemMongo instance', opts);
+        log.load('Creating NovemMongo instance');
+        log.dump('options', opts);
         if (!opts) { opts = {} }
         this.mongodb = null;
         this.awaiting_ready = [];
@@ -24,7 +25,7 @@ class NovemMongo
 
     static get_connection(opts)
     {
-        // why was this here?!?
+        //
         if (opts && opts.dbname && !opts.ignoreOpts) {
                 log.error("Error, opts:", opts);
                 throw new Error("Can't use opts if you are not first connection.");
@@ -48,6 +49,9 @@ class NovemMongo
 
         // set opts that might have defaults (or not)
         opts.name = instanceName;
+        // DOC: This module shares an instance, but you can send in `opts.name`
+        // property and get a named instance to control sharing.  This isn't really
+        // tested atm.
         let single_instance = single_instances[instanceName];
         if (!single_instance) {
             single_instance = new NovemMongo(opts);
@@ -142,23 +146,29 @@ class NovemMongo
 
             var mongodb = null;
             const self = this;
-            MongoClient.connect(mongourl, function(err, db)
-            {
-                if (err)
+            MongoClient.connect(mongourl,
                 {
-                    log.error("nm53: Mongo Not Present", err);
-                    reject(err);
-                    return;
-                }
-                else
-                {
-                    log.answer("nm59: Mongo Found");
-                }
-                self.mongodb = db;
-                if (opts.ready) { opts.ready(self);}
-                self.signalReady();
-                resolve(self); //{status:"good", msg:"mongo connection made."})
-            });
+                    useUnifiedTopology: true,
+                    //useNewUrlParser: true,
+
+                },
+                function(err, client)
+                    {
+                        if (err)
+                        {
+                            log.error("nm53: Mongo Not Present", err);
+                            reject(err);
+                            return;
+                        }
+                        else
+                        {
+                            log.answer("nm59: Mongo Found");
+                        }
+                        self.mongodb = client.db('test');
+                        if (opts.ready) { opts.ready(self);}
+                        self.signalReady();
+                        resolve(self); //{status:"good", msg:"mongo connection made."})
+                    });
         });
     }
 
@@ -184,23 +194,27 @@ class NovemMongo
             if (!opts) { opts = {};}
             if (!opts.dict) { return false;}
             if (!opts.collection) { opts.collection = "unknown";}
+            log.dump("saveDict options", opts, log.info);
+            log.info("saving opts.dict", JSON.stringify(opts.dict, null, 2));
             var collection = this.mongodb.collection(opts.collection);
             const theDict = _.cloneDeep(opts.dict)
-            collection.save( theDict, function(err, r)
-            {
-                log.op(`nm127: dict saved to ${opts.collection}`);
-                if (err)
-                {
-                    reject(err);
-                } else
-                {
-                    //const savedDict = r.ops[0];
-                    resolve({
-                        status: "saved",
-                        savedDoc: r.ops[0],
+            collection.replaceOne( {id: undefined}, theDict,
+                {upsert: true},
+                function(err, r)
+                    {
+                        log.op(`nm127: dict saved to ${opts.collection}`);
+                        if (err)
+                        {
+                            reject(err);
+                        } else
+                        {
+                            //const savedDict = r.ops[0];
+                            resolve({
+                                status: "saved",
+                                savedDoc: r.ops[0],
+                            });
+                        }
                     });
-                }
-            });
         });
     }
 

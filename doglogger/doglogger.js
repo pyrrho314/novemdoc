@@ -280,7 +280,12 @@ class DogLogger {
             ({title,dict,lineprint} = title);
         }
         // maybe better?
-        return this.dumpDictShallow(dict, lineprint, title, opts);
+        // @@refactor: create cleanDict funtion/mechanism
+        let cleanDict  = {...dict};
+        if (cleanDict.password) {
+            cleanDict.password = "xxxxx"
+        }
+        return this.dumpDictShallow(cleanDict, lineprint, title, opts);
     }
 
     makeLine(opts) {
