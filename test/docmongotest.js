@@ -15,7 +15,7 @@ let NovemMongo, NovemDoc;
         var data = {
             property: "pros",
             name: "first",
-            thing: {hello:"goodbye"},
+            thing: {hello: "goodbye"},
             timestamp: new Date(),
         }
 
@@ -31,14 +31,11 @@ let NovemMongo, NovemDoc;
 
         const allDocs = await NovemDoc.mongoFindAll(
             {
-                doctype: 'testDocument',
+                doctype: 'document',
                 returnDicts: false,
             });
 
-        console.log('alldocs---------');
-        allDocs.forEach ((item) => {
-            console.log(item.json(true));
-        });
+        console.log('dmt38: alldocs length', allDocs.length);
         console.log('---------alldocs');
 
         const oneDoc = await NovemDoc.mongoFindOne(

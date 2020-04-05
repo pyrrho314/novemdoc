@@ -13,6 +13,7 @@ const testCollection = 'thing';
 const testDb = 'test';
 
 (async () => {
+    throw Error("NEEDS REPAIR BEFORE RUNNING");
     const packageLogger =  require("../pkgLogger");
     const log = packageLogger.subLogger('novMongoTest');
     var data = {

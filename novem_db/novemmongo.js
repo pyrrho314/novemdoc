@@ -14,6 +14,7 @@ class NovemMongo
     constructor(opts)
     {
         this.refCount = 0;
+        this.client = null;
         log.load('Creating NovemMongo instance');
         log.dump('options', opts);
         if (!opts) { opts = {} }
@@ -113,7 +114,7 @@ class NovemMongo
 
     close()
     {
-        this.mongodb.close();
+        this.client.close();
     }
 
     // MAKE THE CONNECTION
@@ -164,6 +165,7 @@ class NovemMongo
                         {
                             log.answer("nm59: Mongo Found");
                         }
+                        self.client = client;
                         self.mongodb = client.db('test');
                         if (opts.ready) { opts.ready(self);}
                         self.signalReady();
@@ -198,7 +200,7 @@ class NovemMongo
             log.info("saving opts.dict", JSON.stringify(opts.dict, null, 2));
             var collection = this.mongodb.collection(opts.collection);
             const theDict = _.cloneDeep(opts.dict)
-            collection.replaceOne( {id: undefined}, theDict,
+            return collection.replaceOne( {id: undefined}, theDict,
                 {upsert: true},
                 function(err, r)
                     {
@@ -218,65 +220,39 @@ class NovemMongo
         });
     }
 
-    findDicts(opts)
+    async findDicts(opts)
     {
         /* opts:
             query
-            fields
             options
             collection
 
             Gets all docs at once... to do add returnCursor to options OR make another function
         */
-        return new Promise((resolve, reject) => {
-            const collection = this.mongodb.collection(opts.collection);
+        const collection = this.mongodb.collection(opts.collection);
 
-            collection.find(opts.query, opts.fields, opts.options, _fdcb);
-
-            function _fdcb(err, cursor)
-            {
-                if (err)
-                {
-                    log.error("find_dict error: %s", err.msg);
-                    reject({ status: "error", err });
-                }
-                else
-                {
-                    var reta = cursor.toArray();
-                    resolve(reta)
-                }
-            }
-        });
+        const resultCursor = await collection.find(opts.query, opts.fields, opts.options);
+        const result = await resultCursor.toArray();
+        // log.debug("findDict result", result);
+        return result;
     }
 
-    findDict(opts) {
+    async findDict(opts) {
         log.warn('DEPRECATED: findDict, use findDicts');
         return findDicts(opts);
     }
 
-
-    findOneDict(opts){
+    // note we are refactoring such that using Novemdoc on front end will require babel
+    async findOneDict(opts){
         /* opts:
             query - mongo findOne query
-            fields - mongo findOne fields
             options - mongo findOne options
         */
-        return new Promise( (resolve, reject) => {
-           const collection = this.mongodb.collection(opts.collection);
-           collection.findOne(opts.query, opts.fields, opts.options, _fodcb);
-           function _fodcb(err, result)
-           {
-               if (err)
-               {
-                   log.error('findOneDict error: %s', err.msg);
-                   reject({status:"error", err});
-               }
-               else
-               {
-                   resolve(result);
-               }
-           }
-        });
+        const collection = this.mongodb.collection(opts.collection);
+        log.debug("findOneDict got collection",opts.query, opts.optimize);
+        const answer = await collection.findOne(opts.query, opts.options);
+        log.answer('findeOneDict answer', answer);
+        return answer;
     }
 }
 

@@ -171,7 +171,7 @@ class NovemDoc
         //  * imagining other database connections
         //  * efficient connection use
         //
-        console.log("_staticGetMongo", opts);
+        log.debug("_staticGetMongo", opts);
         if (NovemMongo == null)
         {
             if (typeof window === 'undefined') {
@@ -184,6 +184,7 @@ class NovemDoc
         }
         //@@TODO: handle error
         const nmi = await NovemMongo.get_connection(opts);
+        log.debug("_staticGetMongo got nmi")
         return nmi;
     }
 
@@ -404,7 +405,7 @@ class NovemDoc
 
         NovemDoc._staticReleaseMongo(nmi);
 
-        log.answer("find many result", result );
+        log.answer("mongoFindAll result length", result.length );
         if (!returnDicts) {
             result = result.map( (item) => {
                 const rdoc = NovemDoc.from_dict(item)
@@ -423,8 +424,10 @@ class NovemDoc
 
     static async mongoFindOne(arg)
     {
+        log.dump("mongoFindOne arg", arg, log.debug);
         let {doctype, collection, query={}, fields, options, returnDict=false} = arg
         const nmi = await  NovemDoc._staticGetMongo();
+        log.debug("mongoFindOne has nmi")
         if (doctype) {
             _.set(query, '_ndoc.doctype', doctype);
         }

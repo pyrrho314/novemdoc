@@ -112,7 +112,8 @@ class DogLogger {
         else
         {
           if (logargs.length > 1) {
-            logargs[0] = `(${channel}) ${logargs[0]}`;
+            let logline = `(${channel}) ${logargs[0]}`;
+            logargs[0] = logline;
           }
           this.info(...logargs);
         }
