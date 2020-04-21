@@ -5,7 +5,8 @@ let log;
 let _;
 // NovemMongo is lazy loaded below
 var NovemMongo = null;
-console.log("")
+
+const flat = require("flat");
 if (typeof(window) == "undefined")
 { // not windows, assume node
     dot = require("dot-object");
@@ -239,6 +240,11 @@ class NovemDoc
     keys()
     {
         return Object.keys(this.dict);
+    }
+
+    flatten()
+    {
+        return flat(this.dict);
     }
 
     json(pretty){
