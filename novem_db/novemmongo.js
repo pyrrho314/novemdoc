@@ -199,24 +199,44 @@ class NovemMongo
             log.dump("saveDict options", opts, log.info);
             log.info("saving opts.dict", JSON.stringify(opts.dict, null, 2));
             var collection = this.mongodb.collection(opts.collection);
-            const theDict = _.cloneDeep(opts.dict)
-            return collection.replaceOne( {id: undefined}, theDict,
-                {upsert: true},
-                function(err, r)
-                    {
-                        log.op(`nm127: dict saved to ${opts.collection}`);
-                        if (err)
+            const theDict = _.cloneDeep(opts.dict);
+            if (!theDict._id) {
+                return collection.insertOne(theDict,
+                    function(err, r)
                         {
-                            reject(err);
-                        } else
+                            log.op(`nm127: first saved to ${opts.collection}`, JSON.stringify(theDict, null, 4));
+                            if (err)
+                            {
+                                reject(err);
+                            } else
+                            {
+                                //const savedDict = r.ops[0];
+                                resolve({
+                                    status: "saved",
+                                    savedDoc: r.ops[0],
+                                });
+                            }
+                        });
+            }
+            else {
+                return collection.replaceOne( {id: theDict._id}, theDict,
+                    {upsert: true},
+                    function(err, r)
                         {
-                            //const savedDict = r.ops[0];
-                            resolve({
-                                status: "saved",
-                                savedDoc: r.ops[0],
-                            });
-                        }
-                    });
+                            log.op(`nm127: dict saved to ${opts.collection}`, JSON.stringify(theDict, null, 4));
+                            if (err)
+                            {
+                                reject(err);
+                            } else
+                            {
+                                //const savedDict = r.ops[0];
+                                resolve({
+                                    status: "saved",
+                                    savedDoc: r.ops[0],
+                                });
+                            }
+                        });
+            }
         });
     }
 
