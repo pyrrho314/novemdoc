@@ -125,9 +125,10 @@ class NovemDoc
      //
     // STATIC
     //
-    static from_dict(obj)
+    static from_dict(obj, options = {})
     {
-        return new NovemDoc({dict:obj});
+        let {_DocumentClass = NovemClass} = options;
+        return new _DocumentClass({dict:obj});
     }
 
 
@@ -261,7 +262,7 @@ class NovemDoc
     }
 
     toJSON(arg) {
-        console.log('nd190:', arg)
+        //console.log('nd190:', arg)
         return this.json();
     }
 
@@ -377,7 +378,7 @@ class NovemDoc
                             collection: this.doctype,
                             dict: this.dict,
                         });
-        this.releaseMongo();
+        await this.releaseMongo();
         log.detail("save answer: %j", answer);
         const savedDoc = answer.savedDoc;
         // @@PLAN: this doesn't play well with serializeable members of the dict
@@ -396,9 +397,15 @@ class NovemDoc
             query       - passed to mongo find
             fields      - passed to mongo find
             option      - passed to mongo find
+            _DocumentClass  - used to wrap the dict from mongo
             returnDicts - return dict instead of NovemDoc
         */
-        const {doctype, query={}, fields, options, returnDicts = false} = arg
+        const {
+            doctype,
+            _DocumentClass = NovemDoc,
+            query={},
+            fields, options, modelClass = NovemDoc,
+            returnDicts = false} = arg
         const nmi = await NovemDoc._staticGetMongo();
         if (doctype) {
             _.set(query, '_ndoc.doctype', doctype);
@@ -414,7 +421,7 @@ class NovemDoc
         log.answer("mongoFindAll result length", result.length );
         if (!returnDicts) {
             result = result.map( (item) => {
-                const rdoc = NovemDoc.from_dict(item)
+                const rdoc = _DocumentClass.from_dict(item, {_DocumentClass});
                 rdoc.set('_ndoc.mongo.collection', collection);
                 if (!doctype)
                 {

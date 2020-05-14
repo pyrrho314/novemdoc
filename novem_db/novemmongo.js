@@ -91,7 +91,7 @@ class NovemMongo
         // works with static members
         // hardcode now to share all and close only at end, but this
         //  can get smarter.
-        const CLOSE_WHEN_UNUSED = false;
+        const CLOSE_WHEN_UNUSED = true;
         if (CLOSE_WHEN_UNUSED && this.refCount <= 0) {
             this.close()
             const instanceName = this.opts.name;
