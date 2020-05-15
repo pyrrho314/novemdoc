@@ -128,7 +128,8 @@ class NovemDoc
     static from_dict(obj, options = {})
     {
         let {_DocumentClass = NovemClass} = options;
-        return new _DocumentClass({dict:obj});
+        //return new _DocumentClass({dict:obj});
+        return new this({dict:obj});
     }
 
 
