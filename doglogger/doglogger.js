@@ -1,3 +1,5 @@
+//@@REFACTOR: @@DOCO: Needs commenting on what everything does.
+
 const makeLoggerFunction = require ('debug');
 const chalk = require('chalk');
 const stripAnsi = require('strip-ansi');
@@ -186,7 +188,6 @@ class DogLogger {
                 sub: '\u2557',
             },
             {
-
               regx: /<here>/g,
               sub: undefined, // set by checkFirst
               checkFirst: "caller",
@@ -283,9 +284,16 @@ class DogLogger {
         // maybe better?
         // @@refactor: create cleanDict funtion/mechanism
         let cleanDict  = {...dict};
-        if (cleanDict.password) {
-            cleanDict.password = "xxxxx"
-        }
+        let cleanKeys = Object.keys(cleanDict);
+        cleanDict = cleanKeys.reduce( (ac, key) => {
+            if (key.match(/password/i)) {
+                ac[key] = "xxxxx";
+            }
+            return ac;
+        }, cleanDict);
+        // if (cleanDict.password) {
+        //     cleanDict.password = "xxxxx"
+        // }
         return this.dumpDictShallow(cleanDict, lineprint, title, opts);
     }
 
@@ -461,6 +469,15 @@ class DogLogger {
         if (!hideBottomFence) lineprint(fence);
     }
 
+    table(opts) {
+            opts = Object.assign({}, {
+            lineprint: this.op,
+        }, opts)
+        let {text, rows, lineprint} = opts;
+        lineprint(text);
+        console.table(rows);
+
+    }
     truncateString(orig, minus) {
         if (typeof(orig) === "string") {
             const startInd = orig.indexOf(minus);
