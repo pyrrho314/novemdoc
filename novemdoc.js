@@ -125,9 +125,8 @@ class NovemDoc
      //
     // STATIC
     //
-    static from_dict(obj, options = {})
+    static from_dict(obj)
     {
-        let {_DocumentClass = NovemClass} = options;
         //return new _DocumentClass({dict:obj});
         return new this({dict:obj});
     }
@@ -409,6 +408,7 @@ class NovemDoc
             returnDicts = false} = arg
         const nmi = await NovemDoc._staticGetMongo();
         if (doctype) {
+            // I have lodash and dotobj in here... 
             _.set(query, '_ndoc.doctype', doctype);
         }
         const collection = arg.collection ? arg.collection : doctype;
@@ -422,11 +422,10 @@ class NovemDoc
         log.answer("mongoFindAll result length", result.length );
         if (!returnDicts) {
             result = result.map( (item) => {
-                const rdoc = _DocumentClass.from_dict(item, {_DocumentClass});
-                rdoc.set('_ndoc.mongo.collection', collection);
+                const rdoc = this.from_dict(item, {_DocumentClass});
+                // I have no idea why this is here and it seems like some kludge
                 if (!doctype)
                 {
-                    doctype = collection;
                     rdoc.doctype = doctype;
                 }
                 return rdoc;
@@ -438,8 +437,9 @@ class NovemDoc
 
     static async mongoFindOne(arg)
     {
-        log.dump("mongoFindOne arg", arg, log.debug);
+        log.dump("mongoFindOne arg", arg);
         let {doctype, collection, query={}, fields, options, returnDict=false} = arg
+        if (!doctype && this.modelDoctype) doctype = this.modelDoctype;
         const nmi = await  NovemDoc._staticGetMongo();
         log.debug("mongoFindOne has nmi")
         if (doctype) {
@@ -451,16 +451,18 @@ class NovemDoc
         NovemDoc._staticReleaseMongo(nmi);
 
         log.answer("find one result", result );
-        if (!returnDict) {
-            const rdoc = NovemDoc.from_dict(result)
-            rdoc.set('_ndoc.mongo.collection', collection);
-            if (!doctype)
-            {
-                doctype = collection;
-                rdoc.doctype = doctype;
-            }
-            result = rdoc;
-        }
+        // @@REFACTOR: @@NOTE: this seems bad in case of result == null
+        // not  sure what this was about or who it was for.
+        // if (!returnDict) {
+        //     const rdoc = NovemDoc.from_dict(result)
+        //     rdoc.set('_ndoc.mongo.collection', collection);
+        //     if (!doctype)
+        //     {
+        //         doctype = collection;
+        //         rdoc.doctype = doctype;
+        //     }
+        //     result = rdoc;
+        // }
         return result;
     }
 
