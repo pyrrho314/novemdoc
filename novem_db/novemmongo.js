@@ -274,6 +274,24 @@ class NovemMongo
         log.answer('findeOneDict answer', answer);
         return answer;
     }
+
+    async deleteDicts(opts) {
+        {
+            /* opts:
+                query
+                options
+                collection
+
+                Gets all docs at once... to do add returnCursor to options OR make another function
+            */
+            const collection = this.mongodb.collection(opts.collection);
+            log.debug(`deleteDicts query:\n${JSON.stringify(opts.query, null, 4)}`);
+            let result = await collection.deleteMany(opts.query, opts.options);
+            if (result.result) result = result.result;// log.debug("findDict result", result);
+            return result;
+        }
+
+    }
 }
 
 module.exports = {

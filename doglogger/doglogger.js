@@ -12,6 +12,16 @@ const stripAnsi = require('strip-ansi');
 const NO_COLOR = false; // can turn off color
 
 // work on dark background
+/**
+    @constant
+    @type Array
+    @name logChannels
+    These are the channels in the dog logger. to the loger these
+    are equivalent, but they allow filtering with the debug mask.
+    @example
+        // logs something on 'query' channel/log.query(...)
+        logs.query('query complete', query);
+*/
 const _logChannels = [
   { channel: 'init', color: 11},
   { channel: 'load', color: 192},
@@ -25,6 +35,9 @@ const _logChannels = [
   { channel: 'warn', color: 202},
   { channel: 'error', color: 160}];
 
+/**
+     A class for channel based output, based on `debug`.
+*/
 class DogLogger {
   constructor(unitTag, args) {
     if(!args) {
@@ -503,6 +516,9 @@ class DogLogger {
             bright: (arg) => this.clrBright(arg),
             created: (arg) => this.clrCreated(arg),
             brightDivide: (arg) => this.clrCreated(arg),
+            alert: (arg) => chalk.keyword('red')(arg),
+            ok: (arg) => chalk.keyword('green')(arg),
+            warn: (arg) => chalk.keyword('olive')(arg),
         }
     }
 

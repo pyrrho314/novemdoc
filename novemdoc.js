@@ -33,29 +33,32 @@ else
 
 const DEBUG=true;
 
+/**
+
+This is a brower and node class for handling json data in the
+Novem Document standards. It wraps the structure to provide a minimalist framework
+for handling it and passing it around.
+
+this.dict = in principle, JSON.serializable.
+
+The primary purpose is to wrap a JSON serializable object allowing the dictionary to be
+used as a representation of the class. It:
+    1. allows setting and getting and pushing elements with dot notation
+    2. allows saving to DB (currently MongoDB)
+    3. allows taking the dictionary and recreating as desired.
+
+Features from past examples:
+    1. document decomposition/recomposition (todo)
+    2. serialize to XML (???)
+    3. export document as dot-property list
+    4. support transformations through the dot-property key mapping (dot-object does this iirc)
+
+Features excluded:
+    * not a general interface to Mongo. It doesn't hide mongo, it plays well with it.
+        This should be the case with any future database adapter.
+*/
 class NovemDoc
-{/* This is a brower and node class for handling json data in the
-    Novem Document standards. It wraps the structure to provide a minimalist framework
-    for handling it and passing it around.
-
-    this.dict = in principle, JSON.serializable.
-
-    The primary purpose is to wrap a JSON serializable object allowing the dictionary to be
-    used as a representation of the class. It:
-        1. allows setting and getting and pushing elements with dot notation
-        2. allows saving to DB (currently MongoDB)
-        3. allows taking the dictionary and recreating as desired.
-
-    Features from past examples:
-        1. document decomposition/recomposition (todo)
-        2. serialize to XML (???)
-        3. export document as dot-property list
-        4. support transformations through the dot-property key mapping (dot-object does this iirc)
-
-    Features excluded:
-        * not a general interface to Mongo. It doesn't hide mongo, it plays well with it.
-            This should be the case with any future database adapter.
-    */
+{
     constructor (arg1, arg2)
     {
         /*  argument forms:
@@ -408,7 +411,7 @@ class NovemDoc
             returnDicts = false} = arg
         const nmi = await NovemDoc._staticGetMongo();
         if (doctype) {
-            // I have lodash and dotobj in here... 
+            // I have lodash and dotobj in here...
             _.set(query, '_ndoc.doctype', doctype);
         }
         const collection = arg.collection ? arg.collection : doctype;
@@ -446,11 +449,11 @@ class NovemDoc
             _.set(query, '_ndoc.doctype', doctype);
         }
         collection = collection ? collection : doctype;
-        let result =  await nmi.findOneDict({ collection, query, fields, options });
+        let resultDict =  await nmi.findOneDict({ collection, query, fields, options });
 
         NovemDoc._staticReleaseMongo(nmi);
-
-        log.answer("find one result", result );
+        let result = resultDict ? this.from_dict(resultDict) : null;
+        log.answer("find one result", result , resultDict);
         // @@REFACTOR: @@NOTE: this seems bad in case of result == null
         // not  sure what this was about or who it was for.
         // if (!returnDict) {
@@ -466,6 +469,30 @@ class NovemDoc
         return result;
     }
 
+    static async mongoDelete(opts)
+    {
+        log.dump("mongoDelete opts", opts);
+        let {doctype, collection, query={}, fields, options} = opts
+        if (!doctype && this.modelDoctype) doctype = this.modelDoctype;
+        const nmi = await NovemDoc._staticGetMongo();
+        log.debug("mongoDelete has nmi");
+        if (doctype) {
+            // setting doctype in query to match doctype
+            _.set(query, '_ndoc.doctype', doctype);
+        }
+        // @@note: as far as I know the collection has to be the same as doctype
+        collection = collection ? collection : doctype;
+        let result =  await nmi.deleteDicts(
+                {
+                    collection: doctype,
+                    query, options
+                });
+
+        NovemDoc._staticReleaseMongo(nmi);
+
+        log.answer("Deletion Result", result );
+        return result;
+    }
 
 }
 

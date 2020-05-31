@@ -1,11 +1,30 @@
 # `doglogger`
 
-Thin Logger around lightweight category-based logger `debug`. 
+Thin Logger around lightweight category-based logger `debug`.
+
+## log functions
+
+### Categories ("channels")
+
+* init
+* load
+* op
+* query
+* answer  
+* info
+* stats  
+* debug  
+* warn  
+* detail  
+* error  
+
+
+
 
 ## Filtering output
 
 Each logger makes a string like `ndoc:<channel>`. This can be filtered by
-the DEBUG environment variable. In the browser, it's a LocalStorage variable. 
+the DEBUG environment variable. In the browser, it's a LocalStorage variable.
 Channels are all shared. To get a subchannel call a loggers subLogger.
 
 ## Wildcards
@@ -41,4 +60,3 @@ Below are the officially supported formatters:
 
 See the `visionmedia/debug` documentation
 ([npm](https://www.npmjs.com/package/debug), [github](https://github.com/visionmedia/debug)).
-
