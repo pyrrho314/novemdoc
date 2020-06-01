@@ -401,7 +401,7 @@ class NovemDoc
             fields      - passed to mongo find
             option      - passed to mongo find
             _DocumentClass  - used to wrap the dict from mongo
-            returnDicts - return dict instead of NovemDoc
+            returnDicts - boolean return dict instead of NovemDoc
         */
         const {
             doctype,

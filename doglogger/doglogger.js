@@ -517,8 +517,9 @@ class DogLogger {
             created: (arg) => this.clrCreated(arg),
             brightDivide: (arg) => this.clrCreated(arg),
             alert: (arg) => chalk.keyword('red')(arg),
-            ok: (arg) => chalk.keyword('green')(arg),
+            ok: (arg) => chalk.keyword('green').bold(arg),
             warn: (arg) => chalk.keyword('olive')(arg),
+            dim: (arg) => chalk.dim(arg),
         }
     }
 
