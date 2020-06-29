@@ -131,7 +131,25 @@ class NovemDoc
     static from_dict(obj)
     {
         //return new _DocumentClass({dict:obj});
-        return new this({dict:obj});
+        
+        const retval = new this({dict:obj});
+        if (this.modelDoctype) {
+            retval.doctype = this.modelDoctype;
+        }
+        return retval;
+    }
+
+    static from_thing(obj)
+    {   /* Create from dict or pass back NovemDoc.
+            Is convienience gate for function that
+            want a NovemDoc but accept dicts.
+        */
+        if (obj instanceof NovemDoc) {
+            return obj;
+        }
+        // else take this as a dict
+        return this.from_dict(obj);
+
     }
 
 

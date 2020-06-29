@@ -74,7 +74,7 @@ class DogLogger {
       const largestChannelSpace = '      '; // six letter word
       const justify = 'right'; // 'right' or 'left'
       const padding = largestChannelSpace.slice(channel.length);
-      let channelTag = `${channel}:${unitTag}`;
+      let channelTag = `${channel}:${unitTag}`; //@@REORDER
 
       switch (justify) {
         case 'left':
@@ -116,7 +116,7 @@ class DogLogger {
   }
 
     subLogger(unitTag, args) {
-        const augTag = `${this.unitTag}:${unitTag}`;
+        const augTag = `${this.unitTag}:${unitTag}`; //@@REORDER
         return new DogLogger(augTag, args);
     }
 
