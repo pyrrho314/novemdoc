@@ -39,81 +39,81 @@ const _logChannels = [
      A class for channel based output, based on `debug`.
 */
 class DogLogger {
-  constructor(unitTag, args) {
-    if(!args) {
-      args = {};
-    }
+    constructor(unitTag, args) {
+        if(!args) {
+            args = {};
+        }
 
-    this.dbgFragments = [];
+        this.dbgFragments = [];
 
-    this.logFilter = process.env.DOGFILTER;
-    if (this.logFilter) {
-      makeLoggerFunction.enable(this.logFilter);
-    }
+        this.logFilter = process.env.DOGFILTER;
+        if (this.logFilter) {
+            makeLoggerFunction.enable(this.logFilter);
+        }
 
-    this.logChannels = _logChannels; // FUTURE?: pass in custom channes per logger?
-    const logChannels = this.logChannels;
-    if(!unitTag) {
-      unitTag = args.tag;
-    }
-    if (!unitTag) {
-      unitTag = 'doglog'
-    }
-    this.unitTag = unitTag;
-    this.logChannels = logChannels.map((channelArg) => {
-      let channel;
-      let color;
+        this.logChannels = _logChannels; // FUTURE?: pass in custom channes per logger?
+        const logChannels = this.logChannels;
+        if(!unitTag) {
+            unitTag = args.tag;
+        }
+        if (!unitTag) {
+            unitTag = 'doglog'
+        }
+        this.unitTag = unitTag;
+        this.logChannels = logChannels.map((channelArg) => {
+            let channel;
+            let color;
 
-      if(typeof (channelArg) === 'object') {
-        ({ channel, color } = channelArg);
-      } else { // assumed string @@todo: validate
-        channel = channelArg;
-      }
+            if(typeof (channelArg) === 'object') {
+                ({ channel, color } = channelArg);
+            } else { // assumed string @@todo: validate
+                channel = channelArg;
+            }
 
       // do alignment making namespaces all equal length
-      const largestChannelSpace = '      '; // six letter word
-      const justify = 'right'; // 'right' or 'left'
-      const padding = largestChannelSpace.slice(channel.length);
-      let channelTag = `${channel}:${unitTag}`; //@@REORDER
+            const largestChannelSpace = '      '; // six letter word
+            const justify = 'right'; // 'right' or 'left'
+            const padding = largestChannelSpace.slice(channel.length);
+            let channelTag = `${channel}:${unitTag}`; //@@REORDER
 
-      switch (justify) {
-        case 'left':
-          channelTag = channelTag + padding;
-          break;
-        case 'right':
-          channelTag = padding + channelTag;
-          break;
-      }
+            switch (justify) {
+                case 'left':
+                    channelTag = channelTag + padding;
+                    break;
+                case 'right':
+                    channelTag = padding + channelTag;
+                    break;
+            }
 
-      const channelLogFunction = makeLoggerFunction(channelTag);
-      if(color) {
-        channelLogFunction.color = color;
-      }
-      else
-      {
-        color = channelLogFunction.color; // used below
-      }
-      if (NO_COLOR) {
-        channelLogFunction.useColors = false;
-      }
-      channel = channel.trim();
+            const channelLogFunction = makeLoggerFunction(channelTag);
+            if(color) {
+                channelLogFunction.color = color;
+            }
+            else
+            {
+                color = channelLogFunction.color; // used below
+            }
+            if (NO_COLOR) {
+                channelLogFunction.useColors = false;
+            }
+            channel = channel.trim();
 
-      //////
-      ///
-      /// The custom logger function, e.g. .init etc
-      ///
-      this[channel] = (...logargs) => {
-          logargs = logargs.map( (arg) => {
-              return this.replaceTokens(arg);
-          });
-          channelLogFunction(...logargs);
-      };
-      ///
-      //////
+            //////
+            ///
+            /// The custom logger function, e.g. .init etc
+            ///
+            this[channel] = (...logargs) => {
+                logargs = logargs.map( (arg) => {
+                    return this.replaceTokens(arg);
+                });
+                channelLogFunction(...logargs);
+            };
+            ///
+            //////
 
-      return {channel, color};
-    });
-  }
+            return {channel, color};
+        });
+    }
 
     subLogger(unitTag, args) {
         const augTag = `${this.unitTag}:${unitTag}`; //@@REORDER
@@ -135,16 +135,16 @@ class DogLogger {
     }
 
     setDebug(debugmask) {
-      if (debugmask) {
-          makeLoggerFunction.enable(debugmask);
-      } else {
-          makeLoggerFunction.disable();
-      }
+        if (debugmask) {
+            makeLoggerFunction.enable(debugmask);
+        } else {
+            makeLoggerFunction.disable();
+        }
     }
 
     addDebug(debugmask) {
-      this.dbgFragments.push(debugmask);
-      this.setDebug(this.dbgFragments.join(","));
+        this.dbgFragments.push(debugmask);
+        this.setDebug(this.dbgFragments.join(","));
     }
 
     useColors() {
