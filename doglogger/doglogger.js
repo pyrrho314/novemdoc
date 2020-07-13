@@ -50,7 +50,7 @@ class DogLogger {
         if (this.logFilter) {
             makeLoggerFunction.enable(this.logFilter);
         }
-
+        
         this.logChannels = _logChannels; // FUTURE?: pass in custom channes per logger?
         const logChannels = this.logChannels;
         if(!unitTag) {
