@@ -131,7 +131,7 @@ class NovemDoc
     static from_dict(obj)
     {
         //return new _DocumentClass({dict:obj});
-        
+
         const retval = new this({dict:obj});
         if (this.modelDoctype) {
             retval.doctype = this.modelDoctype;
@@ -423,9 +423,12 @@ class NovemDoc
         */
         const {
             doctype,
+            // this allows factories to create unknown OperatingDocs (child class)
             _DocumentClass = NovemDoc,
             query={},
-            fields, options, modelClass = NovemDoc,
+            fields, options,
+            // @@NOTE: is this redundant with _DocumentClass
+            modelClass = NovemDoc,
             returnDicts = false} = arg
         const nmi = await NovemDoc._staticGetMongo();
         if (doctype) {

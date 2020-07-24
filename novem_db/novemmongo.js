@@ -219,7 +219,7 @@ class NovemMongo
                         });
             }
             else {
-                return collection.replaceOne( {id: theDict._id}, theDict,
+                return collection.replaceOne( {_id: theDict._id}, theDict,
                     {upsert: true},
                     function(err, r)
                         {
