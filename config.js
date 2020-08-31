@@ -25,3 +25,17 @@ const configDoc = new NovemDoc({
         });
 
 module.exports = configDoc;
+
+// EXAMPLE local.novemdoc.config.js
+//  These settings will have to match trunk/mongoDocker/.env
+//  @@REFACTOR: Load these setting from mongoDocker/.env instead of duplicating.
+//              However, still support he .js setting for when mongo is not
+//              semi-local in docker.
+// const config = {
+//     dbname: 'novemDocTest',
+//     host: 'localhost:9017', // docker start separately
+//     username: 'root',
+//     password: 'trunkdb',
+// }
+//
+// module.exports = config;
