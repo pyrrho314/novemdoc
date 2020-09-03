@@ -1,30 +1,49 @@
-const { NovemDoc } = require('./novemdoc');
-const defaultsDeep = require('lodash/defaultsDeep')
+import { NovemDoc } from './novemdoc.js';
+import defaultsDeep from 'lodash/defaultsDeep.js';
+import fs from 'fs';
+import path from 'path';
 
-let localConfig = null;
-try {
-    localConfig = require('./local.novemdoc.config.js');
-    // never leave on, secret info:console.log("config7: localConfig", localConfig);
-} catch (error){
-    // there is no local config
-    throw error;
-}
+import { fileURLToPath } from 'url';
+
+const DEBUG = true;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let config = {
     dbname: 'misc',
     host: 'localhost:27017',
 }
 
-if (localConfig) {
-    config = defaultsDeep(localConfig, config);
-}
-
 const configDoc = new NovemDoc({
         doctype: 'config',
         dict: config,
-        });
+});
 
-module.exports = configDoc;
+if (DEBUG) console.log("config.js loading...");
+
+export function loadLocal(configPath = './local.novemdoc.config.js') {
+    configPath = path.normalize(path.join(__dirname, configPath));
+    let localConfig = null;
+    try {
+        const raw = fs.readFileSync(configPath);
+        localConfig = JSON.parse(raw)
+
+        //const localConfig = importedLocalConfig.default;
+        // never leave on, secret info:console.log("config7: localConfig", localConfig);
+    } catch (error){
+        // there is no local config
+        console.log('local config error:', error.message, error.stack)
+    }
+    console.log("config", localConfig);
+    if (localConfig) {
+        config = configDoc.applyDeep(localConfig);
+    }
+};
+
+loadLocal();
+
+export default configDoc;
 
 // EXAMPLE local.novemdoc.config.js
 //  These settings will have to match trunk/mongoDocker/.env

@@ -1,8 +1,9 @@
 //@@REFACTOR: @@DOCO: Needs commenting on what everything does.
 
-const makeLoggerFunction = require ('debug');
-const chalk = require('chalk');
-const stripAnsi = require('strip-ansi');
+import debug from 'debug';
+const makeLoggerFunction = debug;
+import chalk from 'chalk';
+import stripAnsi from 'strip-ansi';
 // Each of these becomes a member function of the IonLogger and is the post-pended suffix in the
 // log filter string.
 
@@ -38,7 +39,7 @@ const _logChannels = [
 /**
      A class for channel based output, based on `debug`.
 */
-class DogLogger {
+export class DogLogger {
     constructor(unitTag, args) {
         if(!args) {
             args = {};
@@ -50,7 +51,7 @@ class DogLogger {
         if (this.logFilter) {
             makeLoggerFunction.enable(this.logFilter);
         }
-        
+
         this.logChannels = _logChannels; // FUTURE?: pass in custom channes per logger?
         const logChannels = this.logChannels;
         if(!unitTag) {
@@ -535,7 +536,4 @@ class DogLogger {
     }
 }
 
-module.exports = {
-  default: DogLogger,
-  DogLogger
-}
+export default DogLogger;
