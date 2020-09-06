@@ -6,6 +6,7 @@ import {mongoRecipeChapter} from '../ndoc_recipes/mongo_recipes/MongoSteps.js';
 import NovemDoc from '../novemdoc.js'
 
 import packageLogger from '../pkgLogger.js';
+packageLogger.setDebug("*");
 const log = packageLogger.subLogger('cntctool');
 //packageLogger.setDebug("*")
 
@@ -18,7 +19,7 @@ const log = packageLogger.subLogger('cntctool');
 
         doc.set("this.is.a.test.key", "valueSettingData");
 
-        console.log("Doc", doc.json(true))
+        log.info(`Doc: ${doc.json(true)}`);
 
         // do query
         const ndocRecipe = new NDocRecipe({
@@ -37,10 +38,16 @@ const log = packageLogger.subLogger('cntctool');
             },
         });
 
-        log.debug("allContactsQuery", allContactsQuery.data);
+        log.debug(`allContactsQuery  ${allContactsQuery.data}`);
         const answer = await ndocRecipe.execute('mongo.query', allContactsQuery);
 
-        log.answer('Query Result', answer);
+        const answerSummary = answer.doc.get('queryResult', []).map( (item) => {
+            return `CONTACT REQUEST: ${item.company} ()${item.wholeName})`;
+        });
+
+        log.answer(`(ct43) Query Result (${answerSummary.length} found):
+\t${answerSummary.join("\n\t")}
+|end of Query Result|`);
 
         const report = await ndocRecipe.finish();
         log.answer(`Cleanup Report ${JSON.stringify(report, null, 4)}`);

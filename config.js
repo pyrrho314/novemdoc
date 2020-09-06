@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { fileURLToPath } from 'url';
+import log from './pkgLogger.js';
 
 const DEBUG = true;
 
@@ -20,7 +21,7 @@ const configDoc = new NovemDoc({
         dict: config,
 });
 
-if (DEBUG) console.log("config.js loading...");
+if (DEBUG) log.init("config.js loading...");
 
 export function loadLocal(configPath = './local.novemdoc.config.js') {
     configPath = path.normalize(path.join(__dirname, configPath));
@@ -35,7 +36,7 @@ export function loadLocal(configPath = './local.novemdoc.config.js') {
         // there is no local config
         console.log('local config error:', error.message, error.stack)
     }
-    console.log("config", localConfig);
+    log.load(`config: ${localConfig}`);
     if (localConfig) {
         config = configDoc.applyDeep(localConfig);
     }

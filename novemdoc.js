@@ -181,16 +181,15 @@ export class NovemDoc
 
          // 2. flatten applicationDict
          const appFlat = appDoc.flatten();
-         log.debug("nd182:", this.dict);
 
          // 3. apply the key/vals to current dict
          _.forEach(appFlat, (value, key) => {
-             console.log("applying", key, value)
+             if (DEBUG) log.op(`applying (${this.doctype}): ${key} = ${value}`)
              this.set(key, value);
          });
 
          // 4. done
-         log.debug("nd193:", this.dict);
+         log.debug(`(nd193) this.dict after application:\n ${this.json(true)}`);
 
      }
 

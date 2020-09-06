@@ -43,7 +43,7 @@ async function getMongoDb() {
         // host includes port if needed
         const {username, dbname, host, password} = config.data;
 
-        log.info('MS41 config', config.data);
+        log.info(`MS41 config ${config.data}`);
 
         const mongoUrl = `mongodb://${username}:${password}@${host}`;
         let client = null;
@@ -66,7 +66,7 @@ async function getMongoDb() {
 
 export class MongoCleanup extends NDocStep {
     async execute() {
-        if (DEBUG) console.log('(MC62) closing mongo');
+        if (DEBUG) log.op('(MC62) closing mongo');
         _mongoClient.close();
         _mongoDb = null;
         _mongoClient = null;
@@ -118,11 +118,11 @@ export class MongoQueryStep extends NDocStep {
         const { doc } = opts;
         const doctype = doc.get('doctype');
         const query = doc.get('query', {});
-        if (DEBUG) console.log('[MA116] doctype:', doctype);
+        if (DEBUG) log.info('[MA116] doctype:', doctype);
         // doc should be mongo query
         let queryResultDoc = null;
         try {
-            console.log('[MA119] query', doctype, query);
+            log.query(`[MA119] query: ${doctype}, ${JSON.stringify(query, null, 4)}`);
             const mongoDb = await getMongoDb();
             const collection = await mongoDb.collection(doctype);
             const cursor = await collection.find(query);
