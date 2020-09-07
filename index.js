@@ -1,7 +1,3 @@
-import NovemDoc from './novemdoc';
-import ndocConfig from './config';
-import DogLogger from './doglogger/doglogger');
-
-export NovemDoc;
-export ndocConfig;
-export DogLogger;
+export NovemDoc from './novemdoc';
+export ndocConfig from './config';
+export DogLogger from './doglogger/doglogger';

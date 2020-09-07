@@ -197,6 +197,10 @@ export class NovemDoc
          return this.dict;
      }
 
+     dataCopy() {
+         return _.cloneDeep(this.dict);
+     }
+
      difference(object) {
          const base = this.dict;
     	 function changes(object, base) {

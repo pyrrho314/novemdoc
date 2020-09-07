@@ -66,10 +66,37 @@ async function getMongoDb() {
 
 export class MongoCleanup extends NDocStep {
     async execute() {
-        if (DEBUG) log.op('(MC62) closing mongo');
-        _mongoClient.close();
-        _mongoDb = null;
-        _mongoClient = null;
+        try {
+            if (DEBUG) log.op('(MC62) closing mongo');
+            _mongoClient.close();
+            _mongoDb = null;
+            _mongoClient = null;
+
+            const retport = {
+                status: 'success',
+                success: true,
+                doc: new NovemDoc({
+                    doctype: "report",
+                    dict: {
+                        actionPerformed: "MongoCleanup",
+                        success: true,
+                        status: 'success',
+                    },
+                }),
+            }
+
+            log.debug(`cleanup ${retport}`)
+            return retport;
+        } catch (err) {
+            const errport = {
+                status: 'error',
+                error: true,
+                message: err.message,
+            };
+            log.debug(`cleanup ${retport}`)
+            return errport;
+        }
+
     }
 }
 

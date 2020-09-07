@@ -42,10 +42,11 @@ const log = packageLogger.subLogger('cntctool');
         const answer = await ndocRecipe.execute('mongo.query', allContactsQuery);
 
         const answerSummary = answer.doc.get('queryResult', []).map( (item) => {
-            return `CONTACT REQUEST: ${item.company} ()${item.wholeName})`;
+            return `CONTACT REQUEST: ${item.company} (${item.wholeName})`;
         });
 
-        log.answer(`(ct43) Query Result (${answerSummary.length} found):
+        log.answer(
+`(ct43) Query Result (${answerSummary.length} found):
 \t${answerSummary.join("\n\t")}
 |end of Query Result|`);
 
