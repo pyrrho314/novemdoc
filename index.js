@@ -1,3 +1,5 @@
-export NovemDoc from './novemdoc';
-export ndocConfig from './config';
-export DogLogger from './doglogger/doglogger';
+import NovemDoc from './novemdoc.js';
+import ndocConfig from './config.js';
+import DogLogger from './doglogger/doglogger.js';
+
+export {NovemDoc, ndocConfig, DogLogger};

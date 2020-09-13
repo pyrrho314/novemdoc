@@ -115,16 +115,19 @@ export class MongoLazyConnect extends NDocStep {
 
 export class MongoSaveStep extends NDocStep {
     async execute(opts) {
+        const {
+            doc, // required: doc to save
+            doctype, //
+        } = opts;
         let status = 'normal';
         let message = null;
         if (DEBUG) console.log('opts [MA75]:', opts);
-        const { doc } = opts;
         if (DEBUG) console.log('opts [MA77]', doc.data);
         try {
             if (DEBUG) console.log('[MA78] save', doc.json(true));
             const mongoDb = await getMongoDb();
             const dict = doc.data;
-            const doctype = doc.getMeta('doctype', 'misc');
+            const collectionName = doctype ? doctype : doc.getMeta('doctype', 'misc');
             const collection = await mongoDb.collection(doctype);
             await collection.insertOne(dict);
         } catch (err) {
@@ -178,6 +181,7 @@ export class MongoQueryStep extends NDocStep {
 // kits arguments must be arrays
 export const mongoRecipeChapter = {
     save: [MongoLazyConnect, MongoSaveStep],
+    saveAndArchive: [ MongoLazyConnect, MongoSaveStep,],
     query: [MongoLazyConnect, MongoQueryStep],
     cleanup: [MongoCleanup],
 };

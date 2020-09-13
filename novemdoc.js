@@ -76,10 +76,10 @@ export class NovemDoc
             {   // this means the initarg IS a previous doc body
                 this.dict = initarg;
             }
-        else if (initarg.dict)
+        else if (initarg.dict || initarg.data)
             {   // this is a regular opts argument with basic
                 // json-serialiazable js obj
-                this.dict = initarg.dict;
+                this.dict = initarg.dict ? initarg.dict : initarg.data;
             }
         else if (initarg.json)
             {   // this is a regular opts argument to pass in
@@ -255,6 +255,14 @@ export class NovemDoc
         } else {
             this.set(`_ndoc.${key}`, value);
         }
+    }
+
+    metaPush(key, value) {
+        this.push(`_ndoc.${key}`, value)
+    }
+
+    metaPop(key,  def) {
+        return this.pop(`_ndoc.${key}`, def);
     }
 
     set(key, value)

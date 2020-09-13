@@ -2,7 +2,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import {NDocRecipe} from '../ndoc_recipes/NDocRecipe.js';
-import {mongoRecipeChapter} from '../ndoc_recipes/mongo_recipes/MongoSteps.js';
+import {mongoRecipeChapter} from '../ndoc_recipes/mongo_recipes/mongoSteps.js';
 import NovemDoc from '../novemdoc.js'
 
 import packageLogger from '../pkgLogger.js';
