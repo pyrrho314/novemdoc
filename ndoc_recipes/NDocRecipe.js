@@ -57,17 +57,21 @@ export class NDocRecipe {
                 }
             }
 
-            // loop over actions
+            // loop over steps
             for (const actionIndex of Object.keys(actionList)) {
                 const action = new actionList[actionIndex]();
+
+                // EXECTUTE STEP
                 let output = await action.execute({ doc, actionIndex });
+                // STEP EXECUTED
+
                 if (!output) output = { status: 'done' };
                 if (output.status) status = output.status;
                 if (output.message) message = output.message;
                 doc = output.doc;
                 if (status === 'error') {
                     console.log(`ERROR DocActions (DA49) in '${action.constructor.name}': ${message}`);
-                    this.history.failedRecipes.push(recipeName);
+                    this.history.failedRecipes.push(`${recipeName}(${action.constructor.name})`);
                     break;
                 }
             }

@@ -257,6 +257,24 @@ export class NovemDoc
         }
     }
 
+    setMeta(key, value)
+    {
+        key = `_ndoc.${key}`;
+        dot.set(key, value, this.dict);
+    }
+
+    getMeta(key, def)
+    {
+        key = `_ndoc.${key}`;
+        if (typeof(def) == "undefined")
+        {
+            def = null;
+        }
+        var rval = dot.pick(key, this.dict);
+        if (!rval) { rval = def }
+        return rval;
+    }
+
     metaPush(key, value) {
         this.push(`_ndoc.${key}`, value)
     }

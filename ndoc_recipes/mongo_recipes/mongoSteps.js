@@ -62,7 +62,7 @@ async function getMongoDb() {
     return _mongoDb;
 }
 
-// Actions
+// Steps
 
 export class MongoCleanup extends NDocStep {
     async execute() {
@@ -121,17 +121,17 @@ export class MongoSaveStep extends NDocStep {
         } = opts;
         let status = 'normal';
         let message = null;
-        if (DEBUG) console.log('opts [MA75]:', opts);
-        if (DEBUG) console.log('opts [MA77]', doc.data);
+        if (DEBUG) log.detail(`opts [MA75]: ${JSON.stringify(opts, null, 4)}`);
+        if (DEBUG) log.detail(`opts [MA77]: ${JSON.stringify(doc.data)}`);
         try {
             if (DEBUG) console.log('[MA78] save', doc.json(true));
             const mongoDb = await getMongoDb();
             const dict = doc.data;
             const collectionName = doctype ? doctype : doc.getMeta('doctype', 'misc');
-            const collection = await mongoDb.collection(doctype);
+            const collection = await mongoDb.collection(collectionName);
             await collection.insertOne(dict);
         } catch (err) {
-            if (DEBUG) console.log('ERROR MongoSaveAction', err.stack);
+            if (DEBUG) log.error(`ERROR MongoSaveAction: ${err.stack}`);
             status = 'error';
             message = err.message;
         }
@@ -140,27 +140,33 @@ export class MongoSaveStep extends NDocStep {
 }
 
 /// /
-// Query Action
+// Query Step
 export class MongoQueryStep extends NDocStep {
     async execute(opts) {
+        /* {
+            doc: NovenDoc w/
+                collection: collection to use
+                query: mongo query
+        }
+        */
         let status = 'normal';
         let message = null;
         const { doc } = opts;
-        const doctype = doc.get('doctype');
+        const collectionName = doc.get('collection');
         const query = doc.get('query', {});
-        if (DEBUG) log.info('[MA116] doctype:', doctype);
+        const queryName = doc.get('queryName', 'unknownQuery');
         // doc should be mongo query
         let queryResultDoc = null;
         try {
-            log.query(`[MA119] query: ${doctype}, ${JSON.stringify(query, null, 4)}`);
+            log.query(`[MA119] query (${queryName}) on '${collectionName}', ${JSON.stringify(query, null, 4)}`);
             const mongoDb = await getMongoDb();
-            const collection = await mongoDb.collection(doctype);
+            const collection = await mongoDb.collection(collectionName);
             const cursor = await collection.find(query);
             const queryResult = await cursor.toArray();
             log.answer(`[MA129] queryResult: ${queryResult.length} records found`);
 
             queryResultDoc = new NovemDoc({
-                doctype: 'detailsList',
+                doctype: queryName,
                 dict: { queryResult },
             });
         } catch (err) {
