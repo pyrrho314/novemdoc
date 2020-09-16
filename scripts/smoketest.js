@@ -3,46 +3,69 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import {NDocRecipe} from '../ndoc_recipes/NDocRecipe.js';
 import {mongoRecipeChapter} from '../ndoc_recipes/mongo_recipes/mongoSteps.js';
-import NovemDoc from '../novemdoc.js'
-
+import NovemDoc from '../novemdoc.js';
+import {prettyJson} from '../misc/pretty.js';
 import packageLogger from '../pkgLogger.js';
+import {mongoSave, mongoQuery} from '../ndoc_recipes/mongo_recipes/mongoFunctions.js';
+
+
 packageLogger.setDebug("*");
 const log = packageLogger.subLogger('cntctool');
+
 //packageLogger.setDebug("*")
 
 (async () => {
     try {
-        const doc = new NovemDoc();
+        const doc = new NovemDoc({
+            doctype: 'testDocument',
+        });
 
+        const doc2 = new NovemDoc({
+            doctype: 'fooDoc',
+        })
+
+        // SET PROPERTIES
         const __filename = fileURLToPath(import.meta.url);
         const __dirname = path.dirname(__filename);
 
         doc.set("this.is.a.test.key", "valueSettingData");
+        doc2.push('this.is.a.list', "one");
+        doc2.push('this.is.a.list', "two");
 
         log.info(`Doc: ${doc.json(true)}`);
 
-        // do query
+        // MONGO
         const ndocRecipe = new NDocRecipe({
             cookBook: {
                 mongo: mongoRecipeChapter,
             }
         });
 
+        // SAVE DOCUMENTS
+
+        let answer = await mongoSave({doc});
+        await mongoSave({doc});
+
+        answer = await mongoSave({doc:doc2});
+
+        // DO QUERY
+        // do query
+
         const allContactsQuery = new NovemDoc({
-            doctype: 'contactQuery',
             dict: {
-                doctype: 'contactRequest',
+                collection: 'testDocument',
                 query: {
-                    '_ndoc.doctype': { $eq: 'contactRequest'},
+                    'this.is.a.test.key': { $eq: 'valueSettingData'},
                 },
             },
         });
 
-        log.debug(`allContactsQuery  ${allContactsQuery.data}`);
-        const answer = await ndocRecipe.execute('mongo.query', allContactsQuery);
+        log.debug(`testDocuments ${allContactsQuery.json(true)}`);
+
+        answer = await ndocRecipe.execute('mongo.query', allContactsQuery);
 
         const answerSummary = answer.doc.get('queryResult', []).map( (item) => {
-            return `CONTACT REQUEST: ${item.company} (${item.wholeName})`;
+            return `CONTACT REQUEST: ${prettyJson(item)}`;
         });
 
         log.answer(

@@ -87,6 +87,9 @@ export class NovemDoc
                 this.dict = JSON.parse(initarg.json);
             }
 
+        // initialization has had chance to build dict, make sure
+        if (!this.dict) this.dict = {};
+
         if (initarg.doctype)
         {
             //this.set("_ndoc.doctype", initarg.doctype);
