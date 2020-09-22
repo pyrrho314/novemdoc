@@ -1,10 +1,11 @@
 import { NovemDoc } from './novemdoc.js';
 import defaultsDeep from 'lodash/defaultsDeep.js';
+import {prettyJson} from './misc/pretty.js';
 import fs from 'fs';
 import path from 'path';
-
 import { fileURLToPath } from 'url';
-import log from './pkgLogger.js';
+import pkglog from './pkgLogger.js';
+const log = pkglog.subLogger('config');
 
 const DEBUG = true;
 
@@ -23,26 +24,49 @@ const configDoc = new NovemDoc({
 
 if (DEBUG) log.init("config.js loading...");
 
-export function loadLocal(configPath = './local.novemdoc.config.js') {
-    configPath = path.normalize(path.join(__dirname, configPath));
-    let localConfig = null;
-    try {
-        const raw = fs.readFileSync(configPath);
-        localConfig = JSON.parse(raw)
+export function loadConfig(configPath) {
+    const localPath
+        = path.normalize(path.join(__dirname, './local.novemdoc.config.js'));
 
+    let localConfig = null;
+    let patchConfig = null
+
+    try {
+        const raw = fs.readFileSync(localPath);
+        localConfig = JSON.parse(raw)
         //const localConfig = importedLocalConfig.default;
         // never leave on, secret info:console.log("config7: localConfig", localConfig);
     } catch (error){
         // there is no local config
         console.log('local config error:', error.message, error.stack)
     }
-    log.load(`config: ${localConfig}`);
+
+    if (configPath) {
+        try {
+            const raw = fs.readFileSync(configPath);
+            patchConfig = JSON.parse(raw)
+            //const localConfig = importedLocalConfig.default;
+            // never leave on, secret info:console.log("config7: localConfig", localConfig);
+        } catch (error){
+            // there is no local config
+            console.log('env config error:', error.message, error.stack)
+        }
+    }
+
     if (localConfig) {
+        log.load(`config: ${prettyJson(localConfig)}`);
         config = configDoc.applyDeep(localConfig);
     }
+
+    if (patchConfig) {
+        log.load(`patch config: ${prettyJson(patchConfig)}`);
+        config = configDoc.applyDeep(patchConfig);
+    }
+    log.load(`(c64) loaded config ${configDoc.json(true)}`);
 };
 
-loadLocal();
+// letting the client call it so dotenv can be used
+// loadLocal(envPath);
 
 export default configDoc;
 

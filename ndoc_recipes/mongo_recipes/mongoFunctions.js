@@ -6,7 +6,7 @@ import NovemDoc from '../../novemdoc.js'
 import packageLogger from '../../pkgLogger.js';
 import {NDocRecipe} from '../NDocRecipe.js';
 import {mongoRecipeChapter} from './mongoSteps.js';
-import {prettyJson} from '../../misc/pretty.js';
+import {prettyJson, shortJson} from '../../misc/pretty.js';
 
 const log = packageLogger.subLogger('nMongoFunc');
 
@@ -37,7 +37,7 @@ export async function mongoQuery(opts) {
         });
 
         if (queryResult.length > 0) {
-            answerSummary.push(`(mF38) Example Item #0 ${prettyJson(queryResult[0])}`)
+            answerSummary.push(`(mF38) Example Item #0 ${shortJson(queryResult[0])}`)
         }
         log.answer(
     `(mF36) Query Result (${answerSummary.length} found):
@@ -68,7 +68,8 @@ export async function mongoSave(opts) {
 
         const answer = await ndocRecipe.execute('mongo.save', doc);
         log.answer(
-            `(ct43) Saved Result (${JSON.stringify(answer, null, 4)}))`);
+            `(mF43) Saved Result (${JSON.stringify(answer, null, 4)}))`
+        );
 
         //const report = await ndocRecipe.finish();
 
@@ -83,6 +84,21 @@ export async function mongoCleanup(opts) {
     // opts not used currently
     const cleanupReport = await ndocRecipe.finish();
     return cleanupReport;
+}
+
+// I think I want to move this or have this use a NovemDoc decomposition
+// member.
+export async function decomposeQueryAnswer(answerDoc, docConstructor) {
+    // returns this if already a NovemDoc
+    answerDoc = NovemDoc.from_thing(answerDoc);
+    log.info("answerDoc", answerDoc.json(true))
+    // get the query result and turn into list of docs
+    if (!docConstructor) docConstructor = NovemDoc;
+    const qR = answerDoc.get('queryResult');
+    const docList = qR.map( (item) => {
+        return docConstructor.from_dict(item);
+    });
+    return docList;
 }
 
 export default {

@@ -1,7 +1,7 @@
 import mongodb from 'mongodb';
 import NovemDoc from '../../novemdoc.js';
 import NDocStep from '../NDocStep.js';
-
+import {prettyJson} from '../../misc/pretty.js';
 import config from '../../config.js'
 
 import pkgLogger from '../../pkgLogger.js';
@@ -43,7 +43,7 @@ async function getMongoDb() {
         // host includes port if needed
         const {username, dbname, host, password} = config.data;
 
-        log.info(`MS41 config ${config.data}`);
+        log.info(`MS46 config ${config.json(true)}`);
 
         const mongoUrl = `mongodb://${username}:${password}@${host}`;
         let client = null;
@@ -135,6 +135,7 @@ export class MongoSaveStep extends NDocStep {
             status = 'error';
             message = err.message;
         }
+        log.info(`reply ${prettyJson({message, status, doc:doc.data})}`)
         return { message, status, doc, };
     }
 }

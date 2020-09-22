@@ -88,6 +88,8 @@ export class NDocRecipe {
             success: true,
             history: _.cloneDeep(this.history),
         };
+
+        this.finish();
         // DON'T DO THIS HERE!, we use use this to know which cleanup to do
         // Therefore, let the client drive the reset cycle:
         //      this.clearRecipeHistory();

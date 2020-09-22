@@ -107,8 +107,6 @@ export class NovemDoc
     //
     static from_dict(obj)
     {
-        //return new _DocumentClass({dict:obj});
-
         const retval = new this({dict:obj});
         if (this.modelDoctype) {
             retval.doctype = this.modelDoctype;
@@ -193,7 +191,7 @@ export class NovemDoc
 
          // 4. done
          log.debug(`(nd193) this.dict after application:\n ${this.json(true)}`);
-
+         return this;
      }
 
      get data() {
