@@ -54,15 +54,15 @@ export function loadConfig(configPath) {
     }
 
     if (localConfig) {
-        log.load(`config: ${prettyJson(localConfig)}`);
+        // SENSITIVE log.load(`config: ${prettyJson(localConfig)}`);
         config = configDoc.applyDeep(localConfig);
     }
 
     if (patchConfig) {
-        log.load(`patch config: ${prettyJson(patchConfig)}`);
+        // SENSITIVE log.load(`(c62) patch config: ${prettyJson(patchConfig)}`);
         config = configDoc.applyDeep(patchConfig);
     }
-    log.load(`(c64) loaded config ${configDoc.json(true)}`);
+    // sensitive information log.load(`(c64) loaded config ${configDoc.json(true)}`);
 };
 
 // letting the client call it so dotenv can be used

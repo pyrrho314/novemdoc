@@ -72,20 +72,23 @@ export class DogLogger {
             }
 
       // do alignment making namespaces all equal length
-            const largestChannelSpace = '      '; // six letter word
+            const largestChannelSpace = '______'; // '      '; // six letter word
             const justify = 'right'; // 'right' or 'left'
             const padding = largestChannelSpace.slice(channel.length);
-            let channelTag = `${channel}:${unitTag}`; //@@REORDER
 
-            switch (justify) {
-                case 'left':
-                    channelTag = channelTag + padding;
-                    break;
-                case 'right':
-                    channelTag = padding + channelTag;
-                    break;
+            let channelTag = `${unitTag}:${channel}`; //@@REGULAR ORDER
+            // let channelTag = `${channel}:${unitTag}`; //@@REORDER
+
+            if (false) { // forget the padding.
+                switch (justify) {
+                    case 'left':
+                        channelTag = channelTag + padding;
+                        break;
+                    case 'right':
+                        channelTag = padding + channelTag;
+                        break;
+                }
             }
-
             const channelLogFunction = makeLoggerFunction(channelTag);
             if(color) {
                 channelLogFunction.color = color;
@@ -143,8 +146,10 @@ export class DogLogger {
         }
     }
 
-    addDebug(debugmask) {
-        this.dbgFragments.push(debugmask);
+    addDebug(...debugmasks) {
+        debugmasks.forEach( item => {
+            this.dbgFragments.push(item);
+        });
         this.setDebug(this.dbgFragments.join(","));
     }
 

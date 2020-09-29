@@ -43,7 +43,9 @@ async function getMongoDb() {
         // host includes port if needed
         const {username, dbname, host, password} = config.data;
 
-        log.info(`MS46 config ${config.json(true)}`);
+        // SECRET INFO: DEV ONLY: NEVER COMMIT WITH THIS LINE NOT COMMENTED OUT
+        // const warn = log.clr.alert(`!!!DONT COMMIT WITHOUT COMMENTING OUT!!!\nSECRET INFO\n`)
+        // log.info(`${warn}config ${config.json(true)}`);
 
         const mongoUrl = `mongodb://${username}:${password}@${host}`;
         let client = null;
@@ -68,7 +70,7 @@ export class MongoCleanup extends NDocStep {
     async execute() {
         try {
             if (DEBUG) log.op('(MC62) closing mongo');
-            _mongoClient.close();
+            if (_mongoClient) _mongoClient.close();
             _mongoDb = null;
             _mongoClient = null;
 
@@ -85,7 +87,7 @@ export class MongoCleanup extends NDocStep {
                 }),
             }
 
-            log.debug(`cleanup ${retport}`)
+            log.debug(`cleanup ${prettyJson(retport)}`)
             return retport;
         } catch (err) {
             const errport = {
@@ -93,10 +95,53 @@ export class MongoCleanup extends NDocStep {
                 error: true,
                 message: err.message,
             };
-            log.debug(`cleanup ${retport}`)
+            log.debug(`cleanup error ${prettyJson(errport)}`, err.stack);
             return errport;
         }
 
+    }
+}
+
+export class MongoDeleteStep extends NDocStep {
+    async execute(opts) {
+        /* {
+            doc: NovemDoc w/
+                collection: we need the collection name
+                query: mongo query
+        }
+        */
+        let status = 'normal';
+        let message = null;
+        const { doc } = opts;
+        const collectionName = doc.get('collection');
+        const query = doc.get('query', {});
+        const queryName = doc.get('queryName', 'unknownQuery');
+        // doc should be mongo query
+        let queryResultDoc = null;
+        try {
+            log.query(`[MA119] query (${queryName}) on '${collectionName}', ${JSON.stringify(query, null, 4)}`);
+            const mongoDb = await getMongoDb();
+            const collection = await mongoDb.collection(collectionName);
+            const deleteResult = await collection.deleteMany(query);
+            log.answer(`[MA129] deleteResult: ${prettyJson(deleteResult)} records found`);
+
+            queryResultDoc = new NovemDoc({
+                doctype: queryName,
+                dict: { deleteResult },
+            });
+        } catch (err) {
+            console.log('ERROR MongoQueryAction', err.stack);
+            status = 'error';
+            message = err.message;
+            throw (err);
+        }
+        return {
+            doc: queryResultDoc,
+            status,
+            error: status==='error' ? true : false,
+            success: status==='success' ? true : false,
+            message,
+        };
     }
 }
 
@@ -145,7 +190,7 @@ export class MongoSaveStep extends NDocStep {
 export class MongoQueryStep extends NDocStep {
     async execute(opts) {
         /* {
-            doc: NovenDoc w/
+            doc: NovemDoc w/
                 collection: collection to use
                 query: mongo query
         }
@@ -187,6 +232,7 @@ export class MongoQueryStep extends NDocStep {
 }
 // kits arguments must be arrays
 export const mongoRecipeChapter = {
+    delete: [MongoLazyConnect, MongoDeleteStep],
     save: [MongoLazyConnect, MongoSaveStep],
     saveAndArchive: [ MongoLazyConnect, MongoSaveStep,],
     query: [MongoLazyConnect, MongoQueryStep],

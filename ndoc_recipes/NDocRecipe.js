@@ -2,6 +2,7 @@ import get from 'lodash/get.js';
 // import {mongoActionKit as mAK} from './MongoActions.js'
 import packageLogger from '../pkgLogger.js';
 import cloneDeep from 'lodash/cloneDeep.js';
+import {prettyJson, shortJson} from '../misc/pretty.js'
 
 const log = packageLogger.subLogger('NDR');
 
@@ -89,7 +90,9 @@ export class NDocRecipe {
             history: _.cloneDeep(this.history),
         };
 
-        this.finish();
+        //@@IMPORTANT: WHERE SHOULD THIS GO.
+        // this.finish();
+
         // DON'T DO THIS HERE!, we use use this to know which cleanup to do
         // Therefore, let the client drive the reset cycle:
         //      this.clearRecipeHistory();
@@ -105,10 +108,15 @@ export class NDocRecipe {
 
         try {
             const cleanupRecipes = this.history.triedRecipes.reduce( (ac, key) => {
+                // @TODO: this is b/c of cleanup getting in the recipe list, maybe
+                // shouldn't be there in the first place.
+                if (key.indexOf("cleanup")>=0) return ac
+
                 const keyparts = key.split('.');
                 const scope = keyparts[0];
                 const cleanupName = `${scope}.cleanup`;
                 ac[cleanupName] = true;
+                log.info(`cleanupRecipe: ${cleanupName} from ${key}`);
                 return ac;
             }, {});
             let reports = [];
@@ -132,7 +140,7 @@ export class NDocRecipe {
                     oneSuccess = true;
                     report = oneReport.doc.dataCopy();
                 }
-                log.debug(`report: ${report}`);
+                log.debug(`(135) report: ${prettyJson(report)}`);
                 reports.push(report);
             }
         } catch (err) {

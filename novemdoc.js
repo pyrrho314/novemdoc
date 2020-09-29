@@ -185,12 +185,13 @@ export class NovemDoc
 
          // 3. apply the key/vals to current dict
          _.forEach(appFlat, (value, key) => {
-             if (DEBUG) log.op(`applying (${this.doctype}): ${key} = ${value}`)
+             const displayVal = (key.indexOf("pass")>=0) ? "xxxxxxxx" : value;
+             log.debug(`applying (${this.doctype}): ${key} = ${displayVal}`)
              this.set(key, value);
          });
 
          // 4. done
-         log.debug(`(nd193) this.dict after application:\n ${this.json(true)}`);
+         // can have passwored, SECRETS log.debug(`(nd193) this.dict after application:\n ${this.json(true)}`);
          return this;
      }
 
