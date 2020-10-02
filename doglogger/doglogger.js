@@ -525,6 +525,7 @@ export class DogLogger {
             alert: (arg) => chalk.keyword('red')(arg),
             ok: (arg) => chalk.keyword('green').bold(arg),
             warn: (arg) => chalk.keyword('olive')(arg),
+            info: (arg) => chalk.blue.bold(arg),
             dim: (arg) => chalk.dim(arg),
         }
     }

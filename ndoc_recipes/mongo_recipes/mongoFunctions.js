@@ -18,6 +18,8 @@ const ndocRecipe = new NDocRecipe({
 
 // @@NOTE: this could be important to thoroughly engineer, e.g. a trash collection to curate deletion
 export async function mongoDelete(opts) {
+    // @@TODO: document the schema of this.
+    
     const {queryName, collection, query } = opts;
     try {
 
@@ -58,6 +60,8 @@ export async function mongoDelete(opts) {
 }
 
 export async function mongoQuery(opts) {
+    // @@TODO: document the schema of this.
+
     const {queryName, collection, query } = opts;
     try {
 
@@ -98,6 +102,8 @@ export async function mongoQuery(opts) {
 }
 
 export async function mongoSave(opts) {
+    // @@TODO: document the schema of this.
+
     const {
         doc, // required: doc to save
     } = opts;

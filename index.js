@@ -4,4 +4,8 @@ import DogLogger from './doglogger/doglogger.js';
 
 import {prettyJson, shortJson} from './misc/pretty.js'
 
-export {NovemDoc, ndocConfig, DogLogger, loadConfig};
+export {
+    NovemDoc, DogLogger,
+    ndocConfig, loadConfig,
+    prettyJson, shortJson,
+};

@@ -116,14 +116,14 @@ export class NDocRecipe {
                 const scope = keyparts[0];
                 const cleanupName = `${scope}.cleanup`;
                 ac[cleanupName] = true;
-                log.info(`cleanupRecipe: ${cleanupName} from ${key}`);
+                log.debug(`cleanupRecipe (119): ${cleanupName} from ${key}`);
                 return ac;
             }, {});
             let reports = [];
             report.cleanupReports = reports;
             for (const cleanupKey in cleanupRecipes) {
                 const cleanupRecipe = cleanupRecipes[cleanupKey] ? cleanupKey : null;
-                log.info("cleanupRecipe", cleanupRecipe);
+                log.debug("cleanupRecipe", cleanupRecipe);
 
                 if (!cleanupRecipe) continue;
 

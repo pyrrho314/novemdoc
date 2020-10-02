@@ -171,10 +171,22 @@ export class MongoSaveStep extends NDocStep {
         try {
             if (DEBUG) console.log('[MA78] save', doc.json(true));
             const mongoDb = await getMongoDb();
+            const mongoId = doc.get('_id', null);
             const dict = doc.data;
+            log.debug("mS176: ", dict);
             const collectionName = doctype ? doctype : doc.getMeta('doctype', 'misc');
             const collection = await mongoDb.collection(collectionName);
-            await collection.insertOne(dict);
+            if  (!mongoId) {
+                await collection.insertOne(dict);
+            } else {
+                await collection.replaceOne({
+                        _id: {
+                            $eq: mongoId
+                        }
+                    },
+                    dict,
+                );
+            }
         } catch (err) {
             if (DEBUG) log.error(`ERROR MongoSaveAction: ${err.stack}`);
             status = 'error';
