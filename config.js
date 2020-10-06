@@ -9,14 +9,19 @@ const log = pkglog.subLogger('config');
 
 const DEBUG = true;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// @@BRANCH: defevelopment-FE
+// @@FRONTEND: babel doesn't like this and we don't use them... branch for now
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+
+// let config = {
+//     dbname: 'misc',
+//     host: 'localhost:27017',
+// }
 
 let config = {
-    dbname: 'misc',
-    host: 'localhost:27017',
+    appType: 'NovemDocThrouputApp',
 }
-
 const configDoc = new NovemDoc({
         doctype: 'config',
         dict: config,
@@ -24,6 +29,7 @@ const configDoc = new NovemDoc({
 
 if (DEBUG) log.init("config.js loading...");
 
+// just isn't called on FE
 export function loadConfig(configPath) {
     const localPath
         = path.normalize(path.join(__dirname, './local.novemdoc.config.js'));
