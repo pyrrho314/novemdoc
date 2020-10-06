@@ -6,7 +6,7 @@ import config from '../../config.js'
 
 import pkgLogger from '../../pkgLogger.js';
 
-const log = pkgLogger.subLogger('MS');
+const log = pkgLogger.subLogger('mS');
 
 const { MongoClient } = mongodb;
 /*
@@ -119,18 +119,18 @@ export class MongoDeleteStep extends NDocStep {
         // doc should be mongo query
         let queryResultDoc = null;
         try {
-            log.query(`[MA119] query (${queryName}) on '${collectionName}', ${JSON.stringify(query, null, 4)}`);
+            log.query(`[119] query (${queryName}) on '${collectionName}', ${JSON.stringify(query, null, 4)}`);
             const mongoDb = await getMongoDb();
             const collection = await mongoDb.collection(collectionName);
             const deleteResult = await collection.deleteMany(query);
-            log.answer(`[MA129] deleteResult: ${prettyJson(deleteResult)} records found`);
+            log.answer(`[129] deleteResult: ${prettyJson(deleteResult)} records found`);
 
             queryResultDoc = new NovemDoc({
                 doctype: queryName,
                 dict: { deleteResult },
             });
         } catch (err) {
-            console.log('ERROR MongoQueryAction', err.stack);
+            console.log('ERROR MongoQueryStep', err.stack);
             status = 'error';
             message = err.message;
             throw (err);
@@ -166,14 +166,11 @@ export class MongoSaveStep extends NDocStep {
         } = opts;
         let status = 'normal';
         let message = null;
-        if (DEBUG) log.detail(`opts [MA75]: ${JSON.stringify(opts, null, 4)}`);
-        if (DEBUG) log.detail(`opts [MA77]: ${JSON.stringify(doc.data)}`);
         try {
-            if (DEBUG) console.log('[MA78] save', doc.json(true));
+            if (DEBUG) log.debug('[78] save', doc.json(true));
             const mongoDb = await getMongoDb();
             const mongoId = doc.get('_id', null);
             const dict = doc.data;
-            log.debug("mS176: ", dict);
             const collectionName = doctype ? doctype : doc.getMeta('doctype', 'misc');
             const collection = await mongoDb.collection(collectionName);
             if  (!mongoId) {
@@ -188,11 +185,11 @@ export class MongoSaveStep extends NDocStep {
                 );
             }
         } catch (err) {
-            if (DEBUG) log.error(`ERROR MongoSaveAction: ${err.stack}`);
+            if (DEBUG) log.error(`ERROR MongoSaveStep: ${err.stack}`);
             status = 'error';
             message = err.message;
         }
-        log.info(`reply ${prettyJson({message, status, doc:doc.data})}`)
+        // log.debug(`reply ${prettyJson({message, status, doc:doc.data})}`)
         return { message, status, doc, };
     }
 }

@@ -275,7 +275,7 @@ export class DogLogger {
   // special outputs
     banner(opts) {
         opts = Object.assign({}, {
-            lineprint: this.op,
+            lineprint: this.info,
             fenceStr: "<flatcon>",
         }, opts)
         let {text, lineprint, fenceStr} = opts;
