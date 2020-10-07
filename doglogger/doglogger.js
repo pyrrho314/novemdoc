@@ -1,8 +1,9 @@
 //@@REFACTOR: @@DOCO: Needs commenting on what everything does.
 
-const makeLoggerFunction = require ('debug');
-const chalk = require('chalk');
-const stripAnsi = require('strip-ansi');
+import debug from 'debug';
+const makeLoggerFunction = debug;
+import chalk from 'chalk';
+import stripAnsi from 'strip-ansi';
 // Each of these becomes a member function of the IonLogger and is the post-pended suffix in the
 // log filter string.
 
@@ -38,7 +39,7 @@ const _logChannels = [
 /**
      A class for channel based output, based on `debug`.
 */
-class DogLogger {
+export class DogLogger {
     constructor(unitTag, args) {
         if(!args) {
             args = {};
@@ -50,7 +51,7 @@ class DogLogger {
         if (this.logFilter) {
             makeLoggerFunction.enable(this.logFilter);
         }
-        
+
         this.logChannels = _logChannels; // FUTURE?: pass in custom channes per logger?
         const logChannels = this.logChannels;
         if(!unitTag) {
@@ -71,20 +72,23 @@ class DogLogger {
             }
 
       // do alignment making namespaces all equal length
-            const largestChannelSpace = '      '; // six letter word
+            const largestChannelSpace = '______'; // '      '; // six letter word
             const justify = 'right'; // 'right' or 'left'
             const padding = largestChannelSpace.slice(channel.length);
-            let channelTag = `${channel}:${unitTag}`; //@@REORDER
 
-            switch (justify) {
-                case 'left':
-                    channelTag = channelTag + padding;
-                    break;
-                case 'right':
-                    channelTag = padding + channelTag;
-                    break;
+            let channelTag = `${unitTag}:${channel}`; //@@REGULAR ORDER
+            // let channelTag = `${channel}:${unitTag}`; //@@REORDER
+
+            if (false) { // forget the padding.
+                switch (justify) {
+                    case 'left':
+                        channelTag = channelTag + padding;
+                        break;
+                    case 'right':
+                        channelTag = padding + channelTag;
+                        break;
+                }
             }
-
             const channelLogFunction = makeLoggerFunction(channelTag);
             if(color) {
                 channelLogFunction.color = color;
@@ -142,8 +146,10 @@ class DogLogger {
         }
     }
 
-    addDebug(debugmask) {
-        this.dbgFragments.push(debugmask);
+    addDebug(...debugmasks) {
+        debugmasks.forEach( item => {
+            this.dbgFragments.push(item);
+        });
         this.setDebug(this.dbgFragments.join(","));
     }
 
@@ -269,7 +275,7 @@ class DogLogger {
   // special outputs
     banner(opts) {
         opts = Object.assign({}, {
-            lineprint: this.op,
+            lineprint: this.info,
             fenceStr: "<flatcon>",
         }, opts)
         let {text, lineprint, fenceStr} = opts;
@@ -519,6 +525,7 @@ class DogLogger {
             alert: (arg) => chalk.keyword('red')(arg),
             ok: (arg) => chalk.keyword('green').bold(arg),
             warn: (arg) => chalk.keyword('olive')(arg),
+            info: (arg) => chalk.blue.bold(arg),
             dim: (arg) => chalk.dim(arg),
         }
     }
@@ -535,7 +542,4 @@ class DogLogger {
     }
 }
 
-module.exports = {
-  default: DogLogger,
-  DogLogger
-}
+export default DogLogger;
