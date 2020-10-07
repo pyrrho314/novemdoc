@@ -1,3 +1,1 @@
-const doglogger = require('./doglogger');
-
-module.exports = doglogger;
+export {DogLogger} from './doglogger.js';

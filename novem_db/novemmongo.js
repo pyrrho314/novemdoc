@@ -166,8 +166,9 @@ class NovemMongo
                             log.answer("nm59: Mongo Found");
                         }
                         self.client = client;
-                        self.mongodb = client.db('test');
-                        if (opts.ready) { opts.ready(self);}
+                        console.log("nm169:", self.opts);
+                        self.mongodb = client.db(self.opts.dbname);
+                        if (opts.ready) { self.opts.ready(self);}
                         self.signalReady();
                         resolve(self); //{status:"good", msg:"mongo connection made."})
                     });

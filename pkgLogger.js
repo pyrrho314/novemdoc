@@ -1,3 +1,5 @@
-const { DogLogger } = require('./doglogger/');
-const packageLogger = new DogLogger('ndoc'); 
-module.exports = packageLogger;
+import { DogLogger } from '@novemdoc/doglogger';
+
+export const packageLogger = new DogLogger('ndoc');
+
+export default packageLogger;

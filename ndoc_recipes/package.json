@@ -1,0 +1,6 @@
+{
+"name" : "@novemdoc/ndoc_recipes",
+"type" : "module",
+"version" : "0.1.0",
+"main": "index.js"
+}
