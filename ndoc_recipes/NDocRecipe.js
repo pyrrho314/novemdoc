@@ -7,7 +7,7 @@ import {prettyJson, shortJson} from '../misc/pretty.js'
 const log = packageLogger.subLogger('NDR');
 
 const DEBUG = true;
-
+     
 
 const _ = {
     cloneDeep,
@@ -22,7 +22,9 @@ const _ = {
 export class NDocRecipe {
     //version = "0.27" // version e.2
     constructor(opts) {
-        if (DEBUG) log.debug("creating NDocRecipe...");
+        if (DEBUG) {
+            log.debug("creating NDocRecipe...");
+        }
         const {cookBook} = opts;
         this.cookBook = cookBook ? cookBook : {};
         this.history = {
@@ -47,8 +49,10 @@ export class NDocRecipe {
         this.history.triedRecipes.push(recipeName);
         let status = 'normal';
         let message = null;
+        log.detail(`Executing '${recipeName}' on {${Object.keys(doc).join(', ')}}`);
         try {
             const actionList = get(this.cookBook, recipeName);
+            log.debug('(ndr55) actionList', JSON.stringify(this.cookBook));
             if (!actionList) {
                 this.history.failedRecipes.push(recipeName);
                 return {
@@ -58,6 +62,7 @@ export class NDocRecipe {
                 }
             }
 
+            ///// Recipe Control Loop
             // loop over steps
             for (const actionIndex of Object.keys(actionList)) {
                 const action = new actionList[actionIndex]();
@@ -78,10 +83,10 @@ export class NDocRecipe {
             }
             this.history.successRecipes.push(recipeName);
         } catch (err) {
-            if (DEBUG) console.log('DocAction execute ERROR:', err.message, err.stack);
+            console.error('DocAction execute ERROR:', err.message, err.stack);
             this.history.failedRecipes.push(recipeName);
-            return { doc, status: 'error', error:true };
-        }
+            return { doc, status: 'error', error:true, message: err.message, stack: err.stack };
+        }s
 
         const retport = {
             doc,
@@ -97,6 +102,89 @@ export class NDocRecipe {
         // Therefore, let the client drive the reset cycle:
         //      this.clearRecipeHistory();
         return retport;
+    }
+
+    async executeStep() {
+        /* Supporting multiple step types:
+
+        */
+    }
+
+    async executeRecipe(recipeName, input) {
+        // 2021-03-17: new version where NDocStep is used to wrap routines.
+        // This has a different philosophy than the last loop
+        // and the two can be integrated as part of this is a more liberal idea of the
+        // input, it is not expected to be a novemdoc (but could include them),
+        // but an object with keys identifying the output with type-related names
+        // NDocStep knows how to rename input and outputs to deliver them to the
+        // next step, meaning steps have to be compatible or connected this way
+        // e.g. if a 'batchSave' step needs a 'bundle' inputs, the previous step
+        // outputing 'patients' would need to map that to 'bundle'.
+        this.history.triedRecipes.push(recipeName);
+        let status = 'normal';
+        let message = null;
+        let output = null;
+        log.detail(`Executing '${recipeName}' on {${Object.keys(input).join(', ')}}`);
+        try {
+            const actionList = get(this.cookBook, recipeName);
+            // log.debug('(ndr55) actionList', JSON.stringify(this.cookBook));
+            if (!actionList) {
+                this.history.failedRecipes.push(recipeName);
+                return {
+                    error: true,
+                    type: 'notFound',
+                    notFound: ['recipe'],
+                    output: input,
+                }
+            }
+
+            ///// Recipe Control Loop
+            // loop over steps
+            for (const actionIndex of Object.keys(actionList)) {
+
+                // this is in execute, where NDocStep subclasses are instantiated here
+                // const action = new actionList[actionIndex]();
+                const action = actionList[actionIndex];
+
+                // EXECTUTE STEP
+                output = await action.execute({ input });
+                // STEP EXECUTED
+
+                if (output.status) status = output.status;
+                if (output.message) message = output.message;
+
+                // @@ ADDRESS FAULT TOLERANCE BY SUPPORTING EXCEPTION ROUTINES
+                if (status === 'error') {
+                    console.log(`ERROR DocActions (DA49) in '${action.constructor.name}': ${message}`);
+                    this.history.failedRecipes.push(`${recipeName}(${action.constructor.name})`);
+                    break;
+                }
+
+            }
+            this.history.successRecipes.push(recipeName);
+        } catch (err) {
+            console.error('DocAction execute ERROR:', err.message, err.stack);
+            this.history.failedRecipes.push(recipeName);
+            return { error:true, message: err.message, stack: err.stack, props:err.props };
+        }
+
+        const recipeReport = {
+            status: 'success',
+            success: true,
+            history: _.cloneDeep(this.history),
+        };
+        const retPackage = {
+            input,
+            output,
+            recipeReport
+        }
+        //@@IMPORTANT: WHERE SHOULD THIS GO.
+        // this.finish();
+
+        // DON'T DO THIS HERE!, we use use this to know which cleanup to do
+        // Therefore, let the client drive the reset cycle:
+        //      this.clearRecipeHistory();
+        return retPackage;
     }
 
     async finish(report = {}) {
