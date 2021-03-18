@@ -112,11 +112,19 @@ export class NDocRecipe {
 
     async executeRecipe(recipeName, input) {
         // 2021-03-17: new version where NDocStep is used to wrap routines.
-        //
+        // This has a different philosophy than the last loop
+        // and the two can be integrated as part of this is a more liberal idea of the
+        // input, it is not expected to be a novemdoc (but could include them),
+        // but an object with keys identifying the output with type-related names
+        // NDocStep knows how to rename input and outputs to deliver them to the
+        // next step, meaning steps have to be compatible or connected this way
+        // e.g. if a 'batchSave' step needs a 'bundle' inputs, the previous step
+        // outputing 'patients' would need to map that to 'bundle'.
         this.history.triedRecipes.push(recipeName);
         let status = 'normal';
         let message = null;
-        log.detail(`Executing '${recipeName}' on {${Object.keys(doc).join(', ')}}`);
+        let output = null;
+        log.detail(`Executing '${recipeName}' on {${Object.keys(input).join(', ')}}`);
         try {
             const actionList = get(this.cookBook, recipeName);
             // log.debug('(ndr55) actionList', JSON.stringify(this.cookBook));
@@ -124,7 +132,6 @@ export class NDocRecipe {
                 this.history.failedRecipes.push(recipeName);
                 return {
                     error: true,
-                    status: 'error',
                     type: 'notFound',
                     notFound: ['recipe'],
                     output: input,
@@ -140,40 +147,44 @@ export class NDocRecipe {
                 const action = actionList[actionIndex];
 
                 // EXECTUTE STEP
-                let output = await action.execute({ input });
+                output = await action.execute({ input });
                 // STEP EXECUTED
 
-                if (!output) output = { status: 'done' };
                 if (output.status) status = output.status;
                 if (output.message) message = output.message;
-                doc = output.doc;
+
+                // @@ ADDRESS FAULT TOLERANCE BY SUPPORTING EXCEPTION ROUTINES
                 if (status === 'error') {
                     console.log(`ERROR DocActions (DA49) in '${action.constructor.name}': ${message}`);
                     this.history.failedRecipes.push(`${recipeName}(${action.constructor.name})`);
                     break;
                 }
+
             }
             this.history.successRecipes.push(recipeName);
         } catch (err) {
             console.error('DocAction execute ERROR:', err.message, err.stack);
             this.history.failedRecipes.push(recipeName);
-            return { doc, status: 'error', error:true, message: err.message, stack: err.stack };
-        }s
+            return { error:true, message: err.message, stack: err.stack, props:err.props };
+        }
 
-        const retport = {
-            doc,
+        const recipeReport = {
             status: 'success',
             success: true,
             history: _.cloneDeep(this.history),
         };
-
+        const retPackage = {
+            input,
+            output,
+            recipeReport
+        }
         //@@IMPORTANT: WHERE SHOULD THIS GO.
         // this.finish();
 
         // DON'T DO THIS HERE!, we use use this to know which cleanup to do
         // Therefore, let the client drive the reset cycle:
         //      this.clearRecipeHistory();
-        return retport;
+        return retPackage;
     }
 
     async finish(report = {}) {

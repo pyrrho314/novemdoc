@@ -7,6 +7,9 @@ import NError from '../errors/NError.js';
 import cloneDeep from 'lodash/cloneDeep.js';
 import get from 'lodash/get.js';
 import set from 'lodash/set.js';
+import packageLogger from '../pkgLogger.js';
+
+const log = packageLogger.subLogger('NDS');
 
 // class actions can extend so we have a middleman available
 export class NDocStep {
@@ -29,17 +32,21 @@ export class NDocStep {
     
     async execute({input}) {
         const args = input ;//this.applyInputMapping_sync(input);
-        const executeRoutineType = `execute_${this.routineType}`;
-        let answer = await this[executeRoutineType](args);
+        const executeRoutineTypeFuncName = `execute${this.routineType}`;
+        const routineExecutor = this[executeRoutineTypeFuncName];
+        log.detail(`execute ${JSON.stringify({executeRoutineTypeFuncName, routineExecutor, args})}`);
+        let answer = await routineExecutor.call(this, args);
         const output = answer; // this.applyOutputMapping_sync(answer);
         return output;
     }
 
     async executeFunction(input) {
+        log.debug('(44)', JSON.stringify(input));
         return this.routine(input);
     }
 
     async executeAsyncFunction(input) {
+        log.debug('(49)', JSON.stringify(input));
         return await this.routine(input);
     }
 
@@ -61,7 +68,7 @@ export class NDocStep {
         return {document: answer, events};
     }
     
-    async getRoutineType_sync({routine}) {
+    getRoutineType_sync({routine}) {
         let constructorName = routine.constructor.name;
         if ([
             'Function',
@@ -76,15 +83,15 @@ export class NDocStep {
         return constructorName;
     }
 
-    async applyInputMapping_sync(args) {
+    applyInputMapping_sync(args) {
         return applyMapping_sync({args, mapping: this.inputMapping});
     }
 
-    async applyOutputMapping_sync(args) {
+    applyOutputMapping_sync(args) {
         return applyMapping_sync({args, mapping: this.outputMapping});
     }
 
-    async applyMapping_sync(metaArgs) {
+    applyMapping_sync(metaArgs) {
         /* metaArgs: {
             args: the full args object from or two job functions
             mapping: the mapping to use, {sourcekeyN:destkeyN}
