@@ -146,9 +146,17 @@ export class NDocRecipe {
                 // const action = new actionList[actionIndex]();
                 const action = actionList[actionIndex];
 
+                //////
+                //
                 // EXECTUTE STEP
+                //
+                log.debug(`(NDR153) step #${actionIndex} input:${JSON.stringify(input)}`);
                 output = await action.execute({ input });
+                log.debug(`(NDR155) step #${actionIndex} output:${JSON.stringify(output)}`);
+                //
                 // STEP EXECUTED
+                //
+                //////
 
                 if (output.status) status = output.status;
                 if (output.message) message = output.message;

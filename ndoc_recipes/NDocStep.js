@@ -46,7 +46,6 @@ export class NDocStep {
     }
 
     async executeAsyncFunction(input) {
-        log.debug('(49)', JSON.stringify(input));
         return await this.routine(input);
     }
 
@@ -56,7 +55,7 @@ export class NDocStep {
             events.push(rv);
         }
         const answer = events[events.length-1];
-        return {document: answer, events};
+        return {...answer, events};
     }
 
     async executeAsyncGeneratorFunction(input) {
@@ -65,7 +64,7 @@ export class NDocStep {
             events.push(rv);
         }
         const answer = events[events.length-1];
-        return {document: answer, events};
+        return {...answer, events};
     }
     
     getRoutineType_sync({routine}) {
