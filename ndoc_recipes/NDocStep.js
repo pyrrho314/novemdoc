@@ -32,11 +32,16 @@ export class NDocStep {
     
     async execute({input}) {
         const args = input ;//this.applyInputMapping_sync(input);
-        const executeRoutineTypeFuncName = `execute${this.routineType}`;
-        const routineExecutor = this[executeRoutineTypeFuncName];
-        log.detail(`execute ${JSON.stringify({executeRoutineTypeFuncName, routineExecutor, args})}`);
-        let answer = await routineExecutor.call(this, args);
-        const output = answer; // this.applyOutputMapping_sync(answer);
+        let output = null;
+        if (this.routine) {
+            const executeRoutineTypeFuncName = `execute${this.routineType}`;
+            const routineExecutor = this[executeRoutineTypeFuncName];
+            log.detail(`execute ${JSON.stringify({executeRoutineTypeFuncName, routineExecutor, args})}`);
+            let answer = await routineExecutor.call(this, args);
+            output = answer; // this.applyOutputMapping_sync(answer);
+        } else {
+            output = args; // this.applyOutpputMapping_sync(answer);
+        }
         return output;
     }
 
