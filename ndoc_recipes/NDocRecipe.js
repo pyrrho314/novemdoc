@@ -137,21 +137,25 @@ export class NDocRecipe {
                     output: input,
                 }
             }
-
+            let throughput = input;
             ///// Recipe Control Loop
             // loop over steps
             for (const actionIndex of Object.keys(actionList)) {
 
                 // this is in execute, where NDocStep subclasses are instantiated here
                 // const action = new actionList[actionIndex]();
+
                 const action = actionList[actionIndex];
 
                 //////
                 //
                 // EXECTUTE STEP
                 //
+                // @NOTE: currently steps make shallow copies to allow shallow filtering
+                // but are not expected to make a deepCopy, which is up to the control
+                // loop.
                 log.debug(`(NDR153) step #${actionIndex} input:${JSON.stringify(input)}`);
-                output = await action.execute({ input });
+                throughput = await action.execute({ input });
                 log.debug(`(NDR155) step #${actionIndex} output:${JSON.stringify(output)}`);
                 //
                 // STEP EXECUTED
@@ -161,13 +165,12 @@ export class NDocRecipe {
                 if (output.status) status = output.status;
                 if (output.message) message = output.message;
 
-                // @@ ADDRESS FAULT TOLERANCE BY SUPPORTING EXCEPTION ROUTINES
+                // @@TODO: ADDRESS FAULT TOLERANCE BY SUPPORTING USER DEFINED EXCEPTION ROUTINES
                 if (status === 'error') {
                     console.log(`ERROR DocActions (DA49) in '${action.constructor.name}': ${message}`);
                     this.history.failedRecipes.push(`${recipeName}(${action.constructor.name})`);
                     break;
                 }
-
             }
             this.history.successRecipes.push(recipeName);
         } catch (err) {
