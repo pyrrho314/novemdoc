@@ -163,30 +163,31 @@ export class NDocRecipe {
                 //////
             }
             this.history.successRecipes.push(recipeName);
+            
+            const recipeReport = {
+                status: 'success',
+                success: true,
+                history: _.cloneDeep(this.history),
+            };
+            const output = cloneDeep(throughput);
+            const retPackage = {
+                input: originalInput,
+                output,
+                recipeReport
+                //@@IMPORTANT: WHERE SHOULD THIS GO.
+                // this.finish();
+                
+                // DON'T DO THIS HERE!, we use use this to know which cleanup to do
+                // Therefore, let the client drive the reset cycle:
+                //      this.clearRecipeHistory();
+            }
+            return retPackage;
         } catch (err) {
             console.error('ERROR in executeRecipe:', err.message, err.stack);
             this.history.failedRecipes.push(recipeName);
             // forward error
             throw err;
         }
-
-        const recipeReport = {
-            status: 'success',
-            success: true,
-            history: _.cloneDeep(this.history),
-        };
-        const retPackage = {
-            input: originalInput,
-            output,
-            recipeReport
-        }
-        //@@IMPORTANT: WHERE SHOULD THIS GO.
-        // this.finish();
-
-        // DON'T DO THIS HERE!, we use use this to know which cleanup to do
-        // Therefore, let the client drive the reset cycle:
-        //      this.clearRecipeHistory();
-        return retPackage;
     }
 
     async finish(report = {}) {
