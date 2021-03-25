@@ -123,7 +123,6 @@ export class NDocRecipe {
         this.history.triedRecipes.push(recipeName);
         let status = 'normal';
         let message = null;
-        let output = null;
 
         // recipe step do not have to clone objects, so they will be mutated
         const originalInput = input;
@@ -159,9 +158,9 @@ export class NDocRecipe {
                 // @NOTE: currently steps make shallow copies to allow shallow filtering
                 // but are not expected to make a deepCopy, which is up to the control
                 // loop.
-                log.debug(`(NDR153) before step #${actionIndex} input:${JSON.stringify(input, null, 3)}`);
-                throughput = await action.execute({ input });
-                log.debug(`(NDR155) after step #${actionIndex} output:${JSON.stringify(output, null, 3)}`);
+                log.debug(`(NDR153) before step #${actionIndex} input:${JSON.stringify(throughput, null, 3)}`);
+                throughput = await action.execute({ input:throughput});
+                log.debug(`(NDR155) after step #${actionIndex} output:${JSON.stringify(throughput, null, 3)}`);
                 //
                 // STEP EXECUTED
                 //

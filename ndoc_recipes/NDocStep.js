@@ -31,6 +31,14 @@ export class NDocStep {
     }
     
     async execute({input}) {
+        /* execute input:
+            {
+                input: routine input object
+            }
+
+            Note: This takes an object to allow other settings between control loop
+            and recipe step.
+        */
         // @@FUTURE: this is where we would copy input if we want it unmolested
         // possibly by step configuration.
         const args = input ;//this.applyInputMapping_sync(input);
