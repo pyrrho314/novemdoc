@@ -31,12 +31,16 @@ export class NDocStep {
     }
     
     async execute({input}) {
+        // @@FUTURE: this is where we would copy input if we want it unmolested
+        // possibly by step configuration.
         const args = input ;//this.applyInputMapping_sync(input);
         let output = null;
         if (this.routine) {
             const executeRoutineTypeFuncName = `execute${this.routineType}`;
             const routineExecutor = this[executeRoutineTypeFuncName];
-            log.detail(`execute ${JSON.stringify({executeRoutineTypeFuncName, routineExecutor, args})}`);
+            log.detail(`(39) execute ${JSON.stringify(
+                {executeRoutineTypeFuncName, routineExecutor, args},
+                null, 4)}`);
             let answer = await routineExecutor.call(this, args);
             output = answer; // this.applyOutputMapping_sync(answer);
         } else {
@@ -46,7 +50,7 @@ export class NDocStep {
     }
 
     async executeFunction(input) {
-        log.debug('(44)', JSON.stringify(input));
+        log.debug('(44)', JSON.stringify(input, null, 4));
         return this.routine(input);
     }
 

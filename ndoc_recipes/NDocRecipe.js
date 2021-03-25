@@ -124,6 +124,11 @@ export class NDocRecipe {
         let status = 'normal';
         let message = null;
         let output = null;
+
+        // recipe step do not have to clone objects, so they will be mutated
+        const originalInput = input;
+        input = cloneDeep(input);
+
         log.detail(`Executing '${recipeName}' on {${Object.keys(input).join(', ')}}`);
         try {
             const actionList = get(this.cookBook, recipeName);
@@ -154,23 +159,13 @@ export class NDocRecipe {
                 // @NOTE: currently steps make shallow copies to allow shallow filtering
                 // but are not expected to make a deepCopy, which is up to the control
                 // loop.
-                log.debug(`(NDR153) step #${actionIndex} input:${JSON.stringify(input)}`);
+                log.debug(`(NDR153) before step #${actionIndex} input:${JSON.stringify(input, null, 3)}`);
                 throughput = await action.execute({ input });
-                log.debug(`(NDR155) step #${actionIndex} output:${JSON.stringify(output)}`);
+                log.debug(`(NDR155) after step #${actionIndex} output:${JSON.stringify(output, null, 3)}`);
                 //
                 // STEP EXECUTED
                 //
                 //////
-
-                if (output.status) status = output.status;
-                if (output.message) message = output.message;
-
-                // @@TODO: ADDRESS FAULT TOLERANCE BY SUPPORTING USER DEFINED EXCEPTION ROUTINES
-                if (status === 'error') {
-                    console.log(`ERROR DocActions (DA49) in '${action.constructor.name}': ${message}`);
-                    this.history.failedRecipes.push(`${recipeName}(${action.constructor.name})`);
-                    break;
-                }
             }
             this.history.successRecipes.push(recipeName);
         } catch (err) {
@@ -185,7 +180,7 @@ export class NDocRecipe {
             history: _.cloneDeep(this.history),
         };
         const retPackage = {
-            input,
+            input: originalInput,
             output,
             recipeReport
         }
