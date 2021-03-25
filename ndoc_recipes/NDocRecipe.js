@@ -110,23 +110,19 @@ export class NDocRecipe {
         */
     }
 
-    async executeRecipe(recipeName, input) {
+    async executeRecipe(inputPackage) {
         // 2021-03-17: new version where NDocStep is used to wrap routines.
-        // This has a different philosophy than the last loop
-        // and the two can be integrated as part of this is a more liberal idea of the
-        // input, it is not expected to be a novemdoc (but could include them),
-        // but an object with keys identifying the output with type-related names
-        // NDocStep knows how to rename input and outputs to deliver them to the
-        // next step, meaning steps have to be compatible or connected this way
-        // e.g. if a 'batchSave' step needs a 'bundle' inputs, the previous step
-        // outputing 'patients' would need to map that to 'bundle'.
+        // The `executeRecipe` has a different philosophy than the `execute` function.
+        //  * execute - Custom NDocStep subclasses use NovemDoc for data throughput.
+        //  * executeRecipe - NDocStep base class can wrap a routine.
+        //
+        const {recipeName, input: originalInput} = inputPackage;
         this.history.triedRecipes.push(recipeName);
         let status = 'normal';
         let message = null;
 
         // recipe step do not have to clone objects, so they will be mutated
-        const originalInput = input;
-        input = cloneDeep(input);
+        const input = cloneDeep(originalInput);
 
         log.detail(`Executing '${recipeName}' on {${Object.keys(input).join(', ')}}`);
         try {
@@ -168,9 +164,10 @@ export class NDocRecipe {
             }
             this.history.successRecipes.push(recipeName);
         } catch (err) {
-            console.error('DocAction execute ERROR:', err.message, err.stack);
+            console.error('ERROR in executeRecipe:', err.message, err.stack);
             this.history.failedRecipes.push(recipeName);
-            return { error:true, message: err.message, stack: err.stack, props:err.props };
+            // forward error
+            throw err;
         }
 
         const recipeReport = {
