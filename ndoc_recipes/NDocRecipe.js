@@ -183,7 +183,7 @@ export class NDocRecipe {
             }
             return retPackage;
         } catch (err) {
-            console.error('ERROR in executeRecipe:', err.message, err.stack);
+            log.error('(186) ERROR in executeRecipe:', err.message, err.stack);
             this.history.failedRecipes.push(recipeName);
             // forward error
             throw err;
