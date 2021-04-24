@@ -284,9 +284,24 @@ export class NovemDoc
         return this.pop(`_ndoc.${key}`, def);
     }
 
+    setFlat(key, value) 
+    {
+        this.dict[key] = value;
+    }
+
     set(key, value)
     {
         dot.set(key, value, this.dict);
+    }
+
+    getFlat(key, def) {
+        if (typeof(def)=="undefined")
+        {
+            def = null;
+        }
+        let rval = this.dict[key];
+        if (!rval) {rval = def}
+        return rval;
     }
 
     get(key, def)

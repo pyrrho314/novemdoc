@@ -5,14 +5,14 @@ import momentLocal from 'moment';
 
 import {NovemDoc, DogLogger,
         prettyJson, shortJson,
-    } from '@novem/novemdoc';
-import {NDocRecipe} from '@novem/novemdoc/ndoc_recipes/NDocRecipe.js';
-import {mongoRecipeChapter} from '@novem/novemdoc/ndoc_recipes/mongo_recipes/mongoSteps.js';
+    } from '../../index.js';
+import {NDocRecipe} from '../../ndoc_recipes/NDocRecipe.js';
+import {mongoRecipeChapter} from '../../ndoc_recipes/mongo_recipes/mongoSteps.js';
 import {
     mongoDelete,
     mongoSave, mongoQuery, mongoFinish,
     decomposeQueryAnswer, decomposeSingleAnswer,
-} from '@novem/novemdoc/ndoc_recipes/mongo_recipes/mongoFunctions.js';
+} from '../../ndoc_recipes/mongo_recipes/mongoFunctions.js';
 
 // import {masterSchemaReference as mSR} from '../dotschemaTools/SchemaReference.js';
 import pkgLogger from '../../pkgLogger.js';

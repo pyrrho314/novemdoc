@@ -15,9 +15,9 @@ import path from 'path';
 import inquirer from 'inquirer';
 import moment from 'moment';
 import dotenv from 'dotenv';
-import {NovemDoc, DogLogger, ndocConfig, loadConfig} from '@novem/novemdoc';
+import {NovemDoc, DogLogger, ndocConfig, loadConfig} from '../novemdoc';
 import {cliConvertValue} from './util/clihelp.js';
-import {prettyJson, shortJson} from '@novem/novemdoc/misc/pretty.js';
+import {prettyJson, shortJson} from '../misc/pretty.js';
 import {TrunkUser} from './classes/TrunkUser.js';
 // @@HISTORY this is all in trunkUser now, except for mongoFinish
 // import {
@@ -25,7 +25,7 @@ import {TrunkUser} from './classes/TrunkUser.js';
 //     mongoSave, mongoQuery, mongoFinish,
 //     decomposeQueryAnswer, decomposeSingleAnswer,
 // } from '@novem/novemdoc/ndoc_recipes/mongo_recipes/mongoFunctions.js';
-import {mongoFinish} from '@novem/novemdoc/ndoc_recipes/mongo_recipes/mongoFunctions.js';
+import {mongoFinish} from '../ndoc_recipes/mongo_recipes/mongoFunctions.js';
 import { fileURLToPath } from 'url';
 import pkglog from '../pkgLogger.js';
 //
