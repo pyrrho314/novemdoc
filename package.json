@@ -1,5 +1,5 @@
 {
-  "name": "@mednax/mednaxdoc",
+  "name": "@novem/novemdoc",
   "type": "module",
   "version": "0.3.0",
   "description": "Helps with passing JSON style dictionary structures, adds document type system and automatic storage option.",
