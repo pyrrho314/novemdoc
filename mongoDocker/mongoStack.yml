@@ -2,9 +2,7 @@
 version: '3.0'
 
 services:
-
   novemdoc-mongo:
-    build: .
     image: mongo
     restart: always
     ports:
