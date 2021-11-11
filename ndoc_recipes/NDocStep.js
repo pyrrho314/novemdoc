@@ -27,7 +27,7 @@ export class NDocStep {
         this.inputMapping = inputMapping;
         this.outputMapping = outputMapping;
         this.routine = routine;
-        this.routineType = this.getRoutineType_sync({routine});
+        this.routineType = routine ? this.getRoutineType_sync({routine}) : null;
     }
     
     async execute({input}) {
