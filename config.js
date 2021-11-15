@@ -38,7 +38,7 @@ export function loadConfig(configPath) {
         // never leave on, secret info:console.log("config7: localConfig", localConfig);
     } catch (error){
         // there is no local config
-        console.log('local config error:', error.message, error.stack)
+        log.info('no local novemdoc config:', error.message);
     }
 
     if (configPath) {

@@ -86,7 +86,7 @@ export class NDocRecipe {
             console.error('DocAction execute ERROR:', err.message, err.stack);
             this.history.failedRecipes.push(recipeName);
             return { doc, status: 'error', error:true, message: err.message, stack: err.stack };
-        }s
+        }
 
         const retport = {
             doc,
