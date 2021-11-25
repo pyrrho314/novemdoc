@@ -38,7 +38,7 @@ export function loadConfig(configPath) {
         // never leave on, secret info:console.log("config7: localConfig", localConfig);
     } catch (error){
         // there is no local config
-        log.info('no local novemdoc config:', error.message);
+        // too much: we don't neet this... config set from env log.info('no local novemdoc config:', error.message);
     }
 
     if (configPath) {
@@ -49,7 +49,7 @@ export function loadConfig(configPath) {
             // never leave on, secret info:console.log("config7: localConfig", localConfig);
         } catch (error){
             // there is no local config
-            console.log('env config error:', error.message, error.stack)
+            // console.log('(c52) env config warning error:', error.message)
         }
     }
 
