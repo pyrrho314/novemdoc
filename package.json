@@ -1,7 +1,7 @@
 {
   "name": "@novem/novemdoc",
   "type": "module",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Helps with passing JSON style dictionary structures, adds document type system and automatic storage option.",
   "main": "index.js",
   "scripts": {
