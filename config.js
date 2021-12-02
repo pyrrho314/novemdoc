@@ -9,7 +9,7 @@ const log = pkglog.subLogger('config');
 
 const DEBUG = true;
 
-// @@BRANCH: defevelopment-FE
+// @@BRANCH: development-FE
 // @@FRONTEND: babel doesn't like this and we don't use them... branch for now
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
@@ -20,7 +20,7 @@ const DEBUG = true;
 // }
 
 let config = {
-    appType: 'NovemDocThrouputApp',
+    appType: 'NovemDocThroughputApp',
 }
 const configDoc = new NovemDoc({
         doctype: 'config',
@@ -75,17 +75,3 @@ export function loadConfig(configPath) {
 // loadLocal(envPath);
 
 export default configDoc;
-
-// EXAMPLE local.novemdoc.config.js
-//  These settings will have to match trunk/mongoDocker/.env
-//  @@REFACTOR: Load these setting from mongoDocker/.env instead of duplicating.
-//              However, still support he .js setting for when mongo is not
-//              semi-local in docker.
-// const config = {
-//     dbname: 'novemDocTest',
-//     host: 'localhost:9017', // docker start separately
-//     username: 'root',
-//     password: 'trunkdb',
-// }
-//
-// module.exports = config;
