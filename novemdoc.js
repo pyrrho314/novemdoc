@@ -105,6 +105,10 @@ export class NovemDoc
      //
     // STATIC
     //
+    static isNovemDoc(obj) {
+        return obj instanceof NovemDoc;
+    }
+
     static from_dict(obj)
     {
         const retval = new this({dict:obj});
