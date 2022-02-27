@@ -289,7 +289,7 @@ export class UserSession extends NovemDoc {
 
     static async getSession(token) {
         let user = null;
-        log.debug(`getSession230: ${token} from ${Object.keys(this.session_store).length}`);
+        log.debug(`(TU292) getSession: ${token} from ${Object.keys(this.session_store).length}`);
         log.debug(`${Object.keys(this.session_store).join("\n")}`);
         const session = this.session_store[token];
         log.debug(`session is "${typeof(session)}"`)

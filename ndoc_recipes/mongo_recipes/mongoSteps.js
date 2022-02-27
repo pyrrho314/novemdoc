@@ -5,6 +5,7 @@ import {prettyJson} from '../../misc/pretty.js';
 import config from '../../config.js'
 
 import pkgLogger from '../../pkgLogger.js';
+const ObjectID = mongodb.ObjectID;
 
 const log = pkgLogger.subLogger('mS');
 
@@ -167,7 +168,7 @@ export class MongoSaveStep extends NDocStep {
         let status = 'normal';
         let message = null;
         try {
-            if (DEBUG) log.debug('[78] save', doc.json(true));
+            if (DEBUG) log.debug('(ms170) save', doc.json(true));
             const mongoDb = await getMongoDb();
             const mongoId = doc.get('_id', null);
             const dict = doc.data;
@@ -176,16 +177,23 @@ export class MongoSaveStep extends NDocStep {
             if  (!mongoId) {
                 await collection.insertOne(dict);
             } else {
-                await collection.replaceOne({
+                const savedict = {
+                    ...dict,
+                    //_id:undefined
+                }
+                delete savedict._id;
+                if (DEBUG) log.debug(`(ms179) replacing ${mongoId} with ${JSON.stringify(savedict, null, 4)}`)
+                const reciept = await collection.replaceOne({
                         _id: {
-                            $eq: mongoId
+                            $eq: ObjectID(mongoId)
                         }
                     },
-                    dict,
+                    savedict,
                 );
+                log.detail(`(ms187) replace reciept: ${JSON.stringify(reciept, null, 4)}`)
             }
         } catch (err) {
-            if (DEBUG) log.error(`ERROR MongoSaveStep: ${err.stack}`);
+            if (DEBUG) log.error(`ERROR MongoSaveStep:\n${err.stack}`);
             status = 'error';
             message = err.message;
         }
