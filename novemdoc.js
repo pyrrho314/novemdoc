@@ -276,12 +276,22 @@ export class NovemDoc
         return rval;
     }
 
-    metaPush(key, value) {
-        this.push(`_ndoc.${key}`, value)
+    pushMeta(key, value) {
+        return this.push(`_ndoc.${key}`, value)
     }
 
-    metaPop(key,  def) {
+    metaPush(key, value) {
+        //@@TODEPRECATE:  use pushMeta add deprecation message
+        return this.pushMeta(key, value);
+    }
+
+    popMeta(key,def) {
         return this.pop(`_ndoc.${key}`, def);
+    }
+    
+    metaPop(key,  def) {
+        //@@TODEPRECATE: add deprecation message
+        return this.popMeta(key,def);
     }
 
     setFlat(key, value) 
@@ -319,7 +329,9 @@ export class NovemDoc
         let target = this.get(key);
         if (target === null) {
             target = [];
+            this.set(key, target);
         }
+
         target.push(value);
     }
 
