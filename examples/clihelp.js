@@ -1,7 +1,7 @@
 // FRONT END version is different than backend, but similar
 export function configureLogger(log, cliargs) {
     // SET DEBUG FLAGS RIGHT AWAY, EVEN BEFORE REQUIRING SOME THINGS
-    console.log("cliargs", JSON.stringify(cliargs, null, 4));
+    console.log("(clih4) cliargs", JSON.stringify(cliargs, null, 4));
     if (cliargs.debug) {
         log.addDebug(cliargs.debug);
     }
@@ -10,6 +10,7 @@ export function configureLogger(log, cliargs) {
             console.log("Warning: don't use '-d' with '--debug', ignoring `-d`.")
         } else {
             log.addDebug("*,-socksjs-:*");
+            console.log("(clih20) log",log.dbgFragments);
         }
     }
 
