@@ -1,4 +1,3 @@
-
 import flat from "flat";
 import dot from "dot-object";
 import _ from 'lodash';
@@ -277,17 +276,42 @@ export class NovemDoc
         return rval;
     }
 
-    metaPush(key, value) {
-        this.push(`_ndoc.${key}`, value)
+    pushMeta(key, value) {
+        return this.push(`_ndoc.${key}`, value)
     }
 
-    metaPop(key,  def) {
+    metaPush(key, value) {
+        //@@TODEPRECATE:  use pushMeta add deprecation message
+        return this.pushMeta(key, value);
+    }
+
+    popMeta(key,def) {
         return this.pop(`_ndoc.${key}`, def);
+    }
+    
+    metaPop(key,  def) {
+        //@@TODEPRECATE: add deprecation message
+        return this.popMeta(key,def);
+    }
+
+    setFlat(key, value) 
+    {
+        this.dict[key] = value;
     }
 
     set(key, value)
     {
         dot.set(key, value, this.dict);
+    }
+
+    getFlat(key, def) {
+        if (typeof(def)=="undefined")
+        {
+            def = null;
+        }
+        let rval = this.dict[key];
+        if (!rval) {rval = def}
+        return rval;
     }
 
     get(key, def)
@@ -305,7 +329,9 @@ export class NovemDoc
         let target = this.get(key);
         if (target === null) {
             target = [];
+            this.set(key, target);
         }
+
         target.push(value);
     }
 

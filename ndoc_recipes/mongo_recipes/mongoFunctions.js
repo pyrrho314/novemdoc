@@ -1,3 +1,6 @@
+/* These are functional interfaces to the recipe system for convienience.
+*/
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 import get from 'lodash/get.js';
@@ -37,17 +40,22 @@ export async function mongoDelete(opts) {
         const answer = await ndocRecipe.execute('mongo.delete', theQuery);
 
         const queryResult = answer.doc.get('queryResult', []);
-        const answerSummary = queryResult.map( (item) => {
+        
+        /* this was only good for users
+            const answerSummary = queryResult.map( (item) => {
             return `answer: ${item.handle} created: ${get(item, 'stats.created')} logged  in ${get(item, 'stats.numLogins')} times`;
         });
-
+        */
+        const answerSummary = queryResult.map( (item) => {
+            return JSON.stringify(item);
+        });
         // ONLY USEFUL FOR DEV
         // if (queryResult.length > 0) {
         //     answerSummary.push(`(mF38) Example Item #0 ${shortJson(queryResult[0])}`)
         // }
 
         log.answer(
-    `(mF36) Query Result (${answerSummary.length} found):
+    `(mF53) Query Result (${answerSummary.length} found):
     \t${answerSummary.join("\n\t")}
     |end of Query Result|`);
 
@@ -79,17 +87,24 @@ export async function mongoQuery(opts) {
         const answer = await ndocRecipe.execute('mongo.query', theQuery);
 
         const queryResult = answer.doc.get('queryResult', []);
+        /*  Only for TrunkUser: could maybe use a Trunkuser member?
+            Would have to pass the target class.
         const answerSummary = queryResult.map( (item) => {
             return `answer: ${item.handle} created: ${get(item, 'stats.created')} logged  in ${get(item, 'stats.numLogins')} times`;
         });
+        */
 
+        const answerSummary = queryResult.map( (item) => {
+            return JSON.stringify(item);
+        });
+    
         // ONLY USEFUL FOR DEV
         // if (queryResult.length > 0) {
         //     answerSummary.push(`(mF38) Example Item #0 ${shortJson(queryResult[0])}`)
         // }
 
         log.answer(
-    `(mF36) Query Result (${answerSummary.length} found):
+    `(mF95) Query Result (${answerSummary.length} found):
     \t${answerSummary.join("\n\t")}
     |end of Query Result|`);
 

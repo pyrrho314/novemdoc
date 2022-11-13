@@ -7,7 +7,7 @@ import {prettyJson, shortJson} from '../misc/pretty.js'
 const log = packageLogger.subLogger('NDR');
 
 const DEBUG = true;
-
+     
 
 const _ = {
     cloneDeep,
@@ -22,7 +22,9 @@ const _ = {
 export class NDocRecipe {
     //version = "0.27" // version e.2
     constructor(opts) {
-        if (DEBUG) log.debug("creating NDocRecipe...");
+        if (DEBUG) {
+            log.debug("creating NDocRecipe...");
+        }
         const {cookBook} = opts;
         this.cookBook = cookBook ? cookBook : {};
         this.history = {
@@ -47,8 +49,10 @@ export class NDocRecipe {
         this.history.triedRecipes.push(recipeName);
         let status = 'normal';
         let message = null;
+        log.detail(`Executing '${recipeName}' on {${Object.keys(doc).join(', ')}}`);
         try {
             const actionList = get(this.cookBook, recipeName);
+            log.debug('(ndr55) actionList', JSON.stringify(this.cookBook));
             if (!actionList) {
                 this.history.failedRecipes.push(recipeName);
                 return {
@@ -58,6 +62,7 @@ export class NDocRecipe {
                 }
             }
 
+            ///// Recipe Control Loop
             // loop over steps
             for (const actionIndex of Object.keys(actionList)) {
                 const action = new actionList[actionIndex]();
@@ -78,9 +83,9 @@ export class NDocRecipe {
             }
             this.history.successRecipes.push(recipeName);
         } catch (err) {
-            if (DEBUG) console.log('DocAction execute ERROR:', err.message, err.stack);
+            console.error('DocAction execute ERROR:', err.message, err.stack);
             this.history.failedRecipes.push(recipeName);
-            return { doc, status: 'error', error:true };
+            return { doc, status: 'error', error:true, message: err.message, stack: err.stack };
         }
 
         const retport = {
@@ -97,6 +102,92 @@ export class NDocRecipe {
         // Therefore, let the client drive the reset cycle:
         //      this.clearRecipeHistory();
         return retport;
+    }
+
+    async executeStep() {
+        /* Supporting multiple step types:
+
+        */
+    }
+
+    async executeRecipe(inputPackage) {
+        // 2021-03-17: new version where NDocStep is used to wrap routines.
+        // The `executeRecipe` has a different philosophy than the `execute` function.
+        //  * execute - Custom NDocStep subclasses use NovemDoc for data throughput.
+        //  * executeRecipe - NDocStep base class can wrap a routine.
+        //
+        const {recipeName, input: originalInput} = inputPackage;
+        this.history.triedRecipes.push(recipeName);
+        let status = 'normal';
+        let message = null;
+
+        // recipe step do not have to clone objects, so they will be mutated
+        const input = cloneDeep(originalInput);
+
+        log.detail(`Executing '${recipeName}' on {${Object.keys(input).join(', ')}}`);
+        try {
+            const actionList = get(this.cookBook, recipeName);
+            // log.debug('(ndr55) actionList', JSON.stringify(this.cookBook));
+            if (!actionList) {
+                this.history.failedRecipes.push(recipeName);
+                return {
+                    error: true,
+                    type: 'notFound',
+                    notFound: ['recipe'],
+                    output: input,
+                }
+            }
+            let throughput = input;
+            ///// Recipe Control Loop
+            // loop over steps
+            for (const actionIndex of Object.keys(actionList)) {
+
+                // this is in execute, where NDocStep subclasses are instantiated here
+                // const action = new actionList[actionIndex]();
+
+                const action = actionList[actionIndex];
+
+                //////
+                //
+                // EXECTUTE STEP
+                //
+                // @NOTE: currently steps make shallow copies to allow shallow filtering
+                // but are not expected to make a deepCopy, which is up to the control
+                // loop.
+                log.debug(`(NDR153) before step #${actionIndex} input:${JSON.stringify(throughput, null, 3)}`);
+                throughput = await action.execute({ input:throughput});
+                log.debug(`(NDR155) after step #${actionIndex} output:${JSON.stringify(throughput, null, 3)}`);
+                //
+                // STEP EXECUTED
+                //
+                //////
+            }
+            this.history.successRecipes.push(recipeName);
+            
+            const recipeReport = {
+                status: 'success',
+                success: true,
+                history: _.cloneDeep(this.history),
+            };
+            const output = cloneDeep(throughput);
+            const retPackage = {
+                input: originalInput,
+                output,
+                recipeReport
+                //@@IMPORTANT: WHERE SHOULD THIS GO.
+                // this.finish();
+                
+                // DON'T DO THIS HERE!, we use use this to know which cleanup to do
+                // Therefore, let the client drive the reset cycle:
+                //      this.clearRecipeHistory();
+            }
+            return retPackage;
+        } catch (err) {
+            log.error('(186) ERROR in executeRecipe:', err.message, err.stack);
+            this.history.failedRecipes.push(recipeName);
+            // forward error
+            throw err;
+        }
     }
 
     async finish(report = {}) {
