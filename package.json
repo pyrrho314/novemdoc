@@ -5,6 +5,7 @@
   "description": "Helps with passing JSON style dictionary structures, adds document type system and automatic storage option.",
   "main": "index.js",
   "scripts": {
+    "build": "babel . -d build",
     "test": "DEBUG='' jest automated",
     "list_links": "npm ls -g --depth=0 --link=true",
     "buildjsdoc": "jsdoc"
@@ -29,6 +30,8 @@
     "supports-color": "7.1.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "eslint": "6.8.0",
     "jest": "25.1.0",
     "minimist": "1.2.5"
