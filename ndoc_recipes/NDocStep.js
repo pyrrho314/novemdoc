@@ -3,6 +3,7 @@
 /* eslint no-unused-vars: 0 */
 // const DEBUG = true;
 
+import {inspect} from 'util';
 import NError from '../errors/NError.js';
 import cloneDeep from 'lodash/cloneDeep.js';
 import get from 'lodash/get.js';
@@ -46,9 +47,8 @@ export class NDocStep {
         if (this.routine) {
             const executeRoutineTypeFuncName = `execute${this.routineType}`;
             const routineExecutor = this[executeRoutineTypeFuncName];
-            log.detail(`(39) execute ${JSON.stringify(
-                {executeRoutineTypeFuncName, routineExecutor, args},
-                null, 4)}`);
+            log.detail(`(nds39) execute ${inspect(
+                {executeRoutineTypeFuncName, routineExecutor, args})}`);
             let answer = await routineExecutor.call(this, args);
             output = answer; // this.applyOutputMapping_sync(answer);
         } else {
@@ -58,7 +58,7 @@ export class NDocStep {
     }
 
     async executeFunction(input) {
-        log.debug('(44)', JSON.stringify(input, null, 4));
+        log.debug('(nds44)', JSON.stringify(input, null, 4));
         return this.routine(input);
     }
 

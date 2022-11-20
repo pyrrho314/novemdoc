@@ -1,3 +1,13 @@
 {
-    "presets": ["env"]
+    "ignore": [
+        "*/node_modules", "build"
+    ],
+    "presets": [
+        "@babel/preset-env"
+    ],
+    "plugins": ["@babel/plugin-proposal-export-default-from"],
+    "targets": {
+        "browsers": "last 2 versions" 
+    },
+    "sourceMaps": true
 }

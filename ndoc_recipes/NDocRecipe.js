@@ -3,16 +3,17 @@ import get from 'lodash/get.js';
 import packageLogger from '../pkgLogger.js';
 import cloneDeep from 'lodash/cloneDeep.js';
 import {prettyJson, shortJson} from '../misc/pretty.js'
+import { inspect } from 'util' // or directly
+import { parseSync } from '@babel/core';
 
 const log = packageLogger.subLogger('NDR');
 
 const DEBUG = true;
-     
 
 const _ = {
     cloneDeep,
 }
-/* NDocRecipies class
+/* NDocRecipe class
 
     When instantiated lists of sequential operations can be specified to do
     database or other document processing.
@@ -44,7 +45,7 @@ export class NDocRecipe {
 
     // Execute a named action
     // Note: has a different signature than DocStep's 'execute' function.
-    async execute(recipeName, doc) {
+    async execute(recipeName, doc={}) {
     // note: we expect DbDoc, could check and convert dict if it comes up
         this.history.triedRecipes.push(recipeName);
         let status = 'normal';
@@ -122,12 +123,13 @@ export class NDocRecipe {
         let message = null;
 
         // recipe step do not have to clone objects, so they will be mutated
-        const input = cloneDeep(originalInput);
-
-        log.detail(`Executing '${recipeName}' on {${Object.keys(input).join(', ')}}`);
+        // const input = originalInput ? cloneDeep(originalInput) : {};
+        const input = originalInput;
+        log.setDebug('*');
+        log.detail(`Executing '${recipeName}' on {${Object.keys(input).join(', ')}} (ndr128)`);
         try {
             const actionList = get(this.cookBook, recipeName);
-            // log.debug('(ndr55) actionList', JSON.stringify(this.cookBook));
+            log.debug('(ndr55) actionList', JSON.stringify(actionList));
             if (!actionList) {
                 this.history.failedRecipes.push(recipeName);
                 return {
@@ -154,22 +156,31 @@ export class NDocRecipe {
                 // @NOTE: currently steps make shallow copies to allow shallow filtering
                 // but are not expected to make a deepCopy, which is up to the control
                 // loop.
-                log.debug(`(NDR153) before step #${actionIndex} input:${JSON.stringify(throughput, null, 3)}`);
+                // log.debug(`(NDR153) before step #${actionIndex} input:${JSON.stringify(throughput, null, 3)}`);
+                log.debug(`(NDR153) before step #${actionIndex} input: { ${Object.keys(throughput)} }`);
                 throughput = await action.execute({ input:throughput});
-                log.debug(`(NDR155) after step #${actionIndex} output:${JSON.stringify(throughput, null, 3)}`);
+                log.debug(`(NDR155) after step #${actionIndex} output: { ${Object.keys(throughput)} }`);
+                //log.debug(`(NDR155) after step #${actionIndex} output:${JSON.stringify(throughput, null, 3)}`);
                 //
                 // STEP EXECUTED
                 //
                 //////
             }
             this.history.successRecipes.push(recipeName);
-            
             const recipeReport = {
                 status: 'success',
                 success: true,
                 history: _.cloneDeep(this.history),
             };
-            const output = cloneDeep(throughput);
+
+            let output = throughput;
+            try {
+            // this doesn't play well with things that might have circular refs, only really for purely serializable objects
+                output = cloneDeep(throughput);
+            } catch(err) {
+                log.error('Unserializable, output', err.message);
+            }
+
             const retPackage = {
                 input: originalInput,
                 output,
@@ -183,7 +194,7 @@ export class NDocRecipe {
             }
             return retPackage;
         } catch (err) {
-            log.error('(186) ERROR in executeRecipe:', err.message, err.stack);
+            log.error('(ndr194) ERROR in executeRecipe:', err.message, err.stack);
             this.history.failedRecipes.push(recipeName);
             // forward error
             throw err;
