@@ -198,6 +198,10 @@ export class NovemDoc
          return this.dict;
      }
 
+     setData(data) {
+        this.dict = data;
+     }
+
      dataCopy() {
          return _.cloneDeep(this.dict);
      }
