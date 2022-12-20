@@ -13,7 +13,7 @@ const DEBUG=true;
 
 Novem Document standards.
 
-NovemDco wraps a nested hash (pute object) structure, ready to serialize
+NovemDoc wraps a nested hash (pute object) structure, ready to serialize
 with no conversion of a core data structure.
 
 this.dict
@@ -235,16 +235,21 @@ export class NovemDoc
     }
 
     json(pretty){
-        var retv = null;
-        if (pretty)
-        {
-            retv = JSON.stringify(this.dict, null, 4)
+        try {
+            var retv = null;
+            if (pretty)
+            {
+                retv = JSON.stringify(this.dict, null, 4)
+            }
+            else
+            {
+                retv = JSON.stringify(this.dict);
+            }
+            return retv;
+        } catch (err) {
+            log.error("Can't stringify data", err.message);
+            return `Can't stringify data" ${err.message}`;
         }
-        else
-        {
-            retv = JSON.stringify(this.dict);
-        }
-        return retv;
     }
 
     toJSON(arg) {

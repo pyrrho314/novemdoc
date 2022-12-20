@@ -8,6 +8,9 @@ import { parseSync } from '@babel/core';
 
 const log = packageLogger.subLogger('NDR');
 
+//@@DEV: remove
+packageLogger.setDebug("*,-babel:*");
+
 const DEBUG = true;
 
 const _ = {
@@ -117,7 +120,7 @@ export class NDocRecipe {
         //  * execute - Custom NDocStep subclasses use NovemDoc for data throughput.
         //  * executeRecipe - NDocStep base class can wrap a routine.
         //
-        const {recipeName, input: originalInput} = inputPackage;
+        const {recipeName, input: originalInput, throwNotFound = true} = inputPackage;
         this.history.triedRecipes.push(recipeName);
         let status = 'normal';
         let message = null;
@@ -125,19 +128,24 @@ export class NDocRecipe {
         // recipe step do not have to clone objects, so they will be mutated
         // const input = originalInput ? cloneDeep(originalInput) : {};
         const input = originalInput;
-        log.setDebug('*');
         log.detail(`Executing '${recipeName}' on {${Object.keys(input).join(', ')}} (ndr128)`);
         try {
             const actionList = get(this.cookBook, recipeName);
             log.debug('(ndr55) actionList', JSON.stringify(actionList));
             if (!actionList) {
-                this.history.failedRecipes.push(recipeName);
-                return {
-                    error: true,
-                    type: 'notFound',
-                    notFound: ['recipe'],
-                    output: input,
-                }
+              this.history.failedRecipes.push(recipeName);
+              const err = {
+                error: true,
+                type: 'notFound',
+                notFound: ['recipe'],
+                recipeName: recipeName,
+              }
+              if (throwNotFound) {
+                const errObject = new Error(`Recipe "${recipeName}" not found.`);
+                errObject.props = err;
+                throw errObject;
+              }
+              return err; 
             }
             let throughput = input;
             ///// Recipe Control Loop
