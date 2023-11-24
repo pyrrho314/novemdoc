@@ -31,6 +31,8 @@ module.exports = {
         "comma-dangle": ["error", "always"],
         "eol-last": ["error", "always"],
         "no-unused-vars": 0,
-        "no-console": 0
+        "no-console": 0,
+        "react/jsx-curly-newline": 0,
+        "spaced-comment": 0,
     }
 };

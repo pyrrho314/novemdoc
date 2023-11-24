@@ -5,12 +5,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import get from 'lodash/get.js';
 import set from 'lodash/set.js';
+import mongodb from 'mongodb';
 import NovemDoc from '../../novemdoc.js'
 import packageLogger from '../../pkgLogger.js';
 import {NDocRecipe} from '../NDocRecipe.js';
 import {mongoRecipeChapter} from './mongoSteps.js';
 import {prettyJson, shortJson} from '../../misc/pretty.js';
 
+const ObjectID = mongodb.ObjectID;
 const log = packageLogger.subLogger('nMongoFunc');
 
 const ndocRecipe = new NDocRecipe({
@@ -19,15 +21,28 @@ const ndocRecipe = new NDocRecipe({
     }
 });
 
+export async function mongoDeleteDoc(opts) {
+    const {doc} = opts;
+    // doc has to have an _id
+    const docId = doc.get('_id');
+    const query = {
+        _id: {
+            $eq: ObjectID(docId),
+        }
+    }
+    const collection  = doc.doctype;
+    const queryName = `delete_${collection}_query`;
+    return await mongoDelete({queryName, collection, query});
+}
 // @@NOTE: this could be important to thoroughly engineer, e.g. a trash collection to curate deletion
 export async function mongoDelete(opts) {
     // @@TODO: document the schema of this.
     
     const {queryName, collection, query } = opts;
     try {
-
+        // @@TODO?: Get away of creating a NovemDoc for theQuery.
         const theQuery = new NovemDoc({
-            doctype:queryName,
+            doctype: queryName,
             data: {
                 query,
                 collection,

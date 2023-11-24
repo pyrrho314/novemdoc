@@ -289,7 +289,7 @@ export class DogLogger {
         }, 0);
         fenceStr = this.replaceTokens(fenceStr);
         const fence = fenceStr.repeat(Math.ceil(maxlen/stripAnsi(fenceStr).length));
-        lines.unshift(fence)
+        lines.unshift(`\n${fence}`);
         lines.push (fence)
         text = lines.join("\n");
         lineprint(text);

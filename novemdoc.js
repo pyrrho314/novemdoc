@@ -166,52 +166,56 @@ export class NovemDoc
     // GENERAL MEMBER FUNCTIONS
      //
 
-     applyDeep(applicationDict) {
-         // @@WHY: not doing this
-         //     defaultsDeep(applicationDict, this.dict);
-         //     this.dict = applicationDict;
-         // We want to support object decomposition where existing
-         // sub-objects might be held by other parts of the process
-         // for separate work. Recomposition is not required in general
-         // and is left for the application. Instead...
+    applyDeep(applicationDict) {
+        // @@WHY: not doing this
+        //     defaultsDeep(applicationDict, this.dict);
+        //     this.dict = applicationDict;
+        // We want to support object decomposition where existing
+        // sub-objects might be held by other parts of the process
+        // for separate work. Recomposition is not required in general
+        // and is left for the application. Instead...
 
-         // 1. we want to flatten, NovemDict does that, might
-         //     want to have a static method for this.
-         const appDoc =  NovemDoc.from_thing(applicationDict);
+        // 1. we want to flatten, NovemDict does that, might
+        //     want to have a static method for this.
+        const appDoc =  NovemDoc.from_thing(applicationDict);
 
-         // 2. flatten applicationDict
-         const appFlat = appDoc.flatten();
+        // 2. flatten applicationDict
+        const appFlat = appDoc.flatten();
 
-         // 3. apply the key/vals to current dict
-         _.forEach(appFlat, (value, key) => {
-             const displayVal = (key.indexOf("pass")>=0) ? "xxxxxxxx" : value;
-             log.debug(`applying (${this.doctype}): ${key} = ${displayVal}`)
-             this.set(key, value);
-         });
+        // 3. apply the key/vals to current dict
+        _.forEach(appFlat, (value, key) => {
+            const displayVal = (key.indexOf("pass")>=0) ? "xxxxxxxx" : value;
+            log.debug(`applying (${this.doctype}): ${key} = ${displayVal}`)
+            this.set(key, value);
+        });
 
-         // 4. done
-         // can have passwored, SECRETS log.debug(`(nd193) this.dict after application:\n ${this.json(true)}`);
-         return this;
-     }
+        // 4. done
+        // can have passwored, SECRETS log.debug(`(nd193) this.dict after application:\n ${this.json(true)}`);
+        return this;
+    }
 
-     get data() {
+    get data() {
          return this.dict;
-     }
+        }
+        
+    copy() {
+        return NovemDoc.from_dict(this.dataCopy());
+    }
+    
+    dataCopy() {
+        return _.cloneDeep(this.dict);
+    }
 
-     dataCopy() {
-         return _.cloneDeep(this.dict);
-     }
-
-     difference(object) {
-         const base = this.dict;
-    	 function changes(object, base) {
-             return _.transform(object, function(result, value, key) {
-    	         if (!_.isEqual(value, base[key])) {
-    				result[key] = (_.isObject(value) && _.isObject(base[key])) ? changes(value, base[key]) : value;
-    			 }
-    		 });
-    	}
-    	return changes(object, base);
+    difference(object) {
+        const base = this.dict;
+        function changes(object, base) {
+            return _.transform(object, function(result, value, key) {
+                if (!_.isEqual(value, base[key])) {
+                result[key] = (_.isObject(value) && _.isObject(base[key])) ? changes(value, base[key]) : value;
+                }
+            });
+    }
+    return changes(object, base);
     }
 
     has_key(key)
@@ -327,7 +331,7 @@ export class NovemDoc
 
     push(key, value) {
         let target = this.get(key);
-        if (target === null) {
+        if (!Array.isArray(target)) {
             target = [];
             this.set(key, target);
         }
