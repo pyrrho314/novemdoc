@@ -386,14 +386,17 @@ export class DogLogger {
         //
 
         for (let key in dict) {
-          const keylen = key.length;
-          const padlen = maxlen-key.length;
-          const pad = ' '.repeat(padlen+5);
-          // console.log("bd192:", {
-          //     keylen,padlen,pad,key,maxlen
-          // })
-          let val = dict[key];
-          if (Array.isArray(val)) {
+            const keylen = key.length;
+            const padlen = maxlen-key.length;
+            const pad = ' '.repeat(padlen+5);
+            // console.log("bd192:", {
+            //     keylen,padlen,pad,key,maxlen
+            // })
+           let val = dict[key];
+            if (typeof(val) === "function") {
+                val = val.toString().split("\n")[0];
+            }
+            if (Array.isArray(val)) {
               for( let subvalIndex in val) {
                   let subval = val[subvalIndex];
                   this.makeLine({
@@ -405,34 +408,33 @@ export class DogLogger {
                       truncateStrings,
                   })
               }
-        }
-        else {
-            this.makeLine({
-                key,
-                val,
-                maxkeylen:maxlen,
-                alllines,
-                truncateStrings,
-            })
-            if (false) {
-                if (truncateStrings) {
-                    val = this.truncateString(val, truncateStrings);
-                    if  (false) { //(typeof(val) === "string") {
-                        const startInd = val.indexOf(truncateStrings);
-                        if (startInd >= 0) {
-                            const valstart = val.slice(0,startInd);
-                            const valend = val.slice(startInd+truncateStrings.length);
-                            const newval = valstart+chalk.bold("\u22ef")+valend;
-                            val = newval;
+            }
+            else {
+                this.makeLine({
+                    key,
+                    val,
+                    maxkeylen:maxlen,
+                    alllines,
+                    truncateStrings,
+                })
+                if (false) {
+                    if (truncateStrings) {
+                        val = this.truncateString(val, truncateStrings);
+                        if  (false) { //(typeof(val) === "string") {
+                            const startInd = val.indexOf(truncateStrings);
+                            if (startInd >= 0) {
+                                const valstart = val.slice(0,startInd);
+                                const valend = val.slice(startInd+truncateStrings.length);
+                                const newval = valstart+chalk.bold("\u22ef")+valend;
+                                val = newval;
+                            }
                         }
                     }
+                    let line = `${pad}${key}: ${val}`;
+                    alllines.push(line);
                 }
-                let line = `${pad}${key}: ${val}`;
-                alllines.push(line);
-            }
+            }  
         }
-
-    }
 
         let maxlinelen = alllines.reduce( (curmax, line) => {
           const linelen = line.length;
