@@ -1,8 +1,8 @@
 //@@REFACTOR: @@DOCO: Needs commenting on what everything does.
 
-import debug from 'debug';
-const makeLoggerFunction = debug;
-import chalk from 'chalk';
+// import debug from 'debug';
+// const makeLoggerFunction = debug;
+// import chalk from 'chalk';
 import stripAnsi from 'strip-ansi';
 // Each of these becomes a member function of the IonLogger and is the post-pended suffix in the
 // log filter string.
@@ -12,6 +12,17 @@ import stripAnsi from 'strip-ansi';
 
 const NO_COLOR = false; // can turn off color
 
+// const chalk = {
+//     dim: (arg) => arg,
+//     blue: {
+//         bold: (arg) => arg,
+//     },
+//     keyword: (arg) => () => arg,
+//     white: {
+//         bold: (arg) => arg,
+//     },
+//     red: (arg) => arg,
+// }
 // work on dark background
 /**
     @constant
@@ -39,6 +50,26 @@ const _logChannels = [
 /**
      A class for channel based output, based on `debug`.
 */
+
+function makeLoggerFunction(channelTag) {
+  function writeLog(...logargs) {
+    console.log('writeLog', channelTag, logargs);
+  }
+  return writeLog;
+}
+
+makeLoggerFunction.enable = function (logFilter) {
+  console.log("enable", logFilter);
+}
+
+
+makeLoggerFunction.disable = function () {
+  console.log("disable");
+}
+makeLoggerFunction.useColors = function () {
+  console.log("useColors");
+}
+
 export class DogLogger {
     constructor(unitTag, args) {
         if(!args) {
@@ -47,7 +78,7 @@ export class DogLogger {
 
         this.dbgFragments = [];
 
-        this.logFilter = process.env.DOGFILTER;
+        // this.logFilter = process.env.DOGFILTER;
         if (this.logFilter) {
             makeLoggerFunction.enable(this.logFilter);
         }
@@ -162,11 +193,11 @@ export class DogLogger {
         const tokens = [
             {
                 regx:/<lb>/g,
-                sub: chalk.dim('\u3010'),
+                sub: '\u3010',
             },
             {
                 regx:/<rb>/g,
-                sub: chalk.dim('\u3011'),
+                sub: '\u3011',
             },
             {
                 regx: /\<connector\>/g,
@@ -226,7 +257,7 @@ export class DogLogger {
                                 depth:5,
                                 showStack:false
                             });
-                            replacement = chalk.dim(replacement);
+
                         }
                         break;
                 }
@@ -336,7 +367,7 @@ export class DogLogger {
                     if (startInd >= 0) {
                         const valstart = val.slice(0,startInd);
                         const valend = val.slice(startInd+truncateStrings.length);
-                        const newval = valstart+chalk.bold("\u22ef")+valend;
+                        const newval = valstart+"\u22ef"+valend;
                         val = newval;
                     }
                 }
@@ -422,7 +453,7 @@ export class DogLogger {
                         if (startInd >= 0) {
                             const valstart = val.slice(0,startInd);
                             const valend = val.slice(startInd+truncateStrings.length);
-                            const newval = valstart+chalk.bold("\u22ef")+valend;
+                            const newval = valstart+"\u22ef"+valend;
                             val = newval;
                         }
                     }
@@ -441,8 +472,8 @@ export class DogLogger {
         }, 0);
         // doing some juggline to get the caller right justified
         if (!hideCaller) {
-            const callerBlock = chalk.dim(`${caller}`);
-            const callerClean = stripAnsi(callerBlock);
+            const callerBlock = `${caller}`;
+            const callerClean = callerBlock;
             const callerLen = callerClean.length;
             const enoughroom = callerLen < maxlinelen;
             const callpad = enoughroom ? " ".repeat(maxlinelen-callerLen) : "";

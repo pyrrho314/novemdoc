@@ -1,8 +1,6 @@
 
-import flat from "flat";
-import dot from "dot-object";
-import _ from 'lodash';
-import defaultsDeep from 'lodash/defaultsDeep.js';
+// import flat from "flat";
+import _ from 'lodash-es';
 import packageLogger from './pkgLogger.js';
 const log = packageLogger.subLogger('ndoc');
 
@@ -266,7 +264,7 @@ export class NovemDoc
     setMeta(key, value)
     {
         key = `_ndoc.${key}`;
-        dot.set(key, value, this.dict);
+        _.set(this.dict, key, value);
     }
 
     getMeta(key, def)
@@ -276,7 +274,7 @@ export class NovemDoc
         {
             def = null;
         }
-        var rval = dot.pick(key, this.dict);
+        var rval = _.get(this.dict, key);
         if (!rval) { rval = def }
         return rval;
     }
@@ -291,7 +289,7 @@ export class NovemDoc
 
     set(key, value)
     {
-        dot.set(key, value, this.dict);
+        _.set(this.dict, key, value);
     }
 
     get(key, def)
@@ -300,7 +298,7 @@ export class NovemDoc
         {
             def = null;
         }
-        var rval = dot.pick(key, this.dict);
+        var rval = _.get(this.dict, key);
         if (!rval) { rval = def }
         return rval;
     }

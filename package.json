@@ -20,13 +20,15 @@
   },
   "homepage": "https://github.com/pyrrho314/novemdoc#readme",
   "dependencies": {
-    "chalk": "3.0.0",
-    "debug": "4.1.1",
-    "dot-object": "2.1.3",
-    "flat": "5.0.0",
-    "lodash": "4.17.19",
+    "chalk": "^5.4.1",
+    "chalkie": "^0.0.12",
+    "debug": "^4.4.0",
+    "dot-object": "^2.1.5",
+    "flat": "^6.0.1",
+    "lodash-es": "^4.17.21",
     "mongodb": "3.5.7",
-    "supports-color": "7.1.0"
+    "strip-ansi": "^7.1.0",
+    "supports-color": "^10.0.0"
   },
   "devDependencies": {
     "eslint": "6.8.0",
