@@ -53,21 +53,21 @@ const _logChannels = [
 
 function makeLoggerFunction(channelTag) {
   function writeLog(...logargs) {
-    console.log('writeLog', channelTag, logargs);
+    console.log('writeLog (dl56)', channelTag, '\n' + logargs.join('\n'));
   }
   return writeLog;
 }
 
 makeLoggerFunction.enable = function (logFilter) {
-  console.log("enable", logFilter);
+  console.log("enable (dl62)", logFilter);
 }
 
 
 makeLoggerFunction.disable = function () {
-  console.log("disable");
+  console.log("disable(dl67)");
 }
 makeLoggerFunction.useColors = function () {
-  console.log("useColors");
+  console.log("useColors (dl70)");
 }
 
 export class DogLogger {
