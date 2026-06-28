@@ -42,8 +42,12 @@ export class NDocRecipe {
         };
     }
 
+    /*@DEPRECATED: use executeRecipe instead
+        This version uses recipes that are lists of NDocStep classes 
+        which are instantiated with `new`. The executeRecipe version supports lists of routines (any type, sync, async, coroutine, async coroutine). This means the routines can be used directly as a function library.
     // Execute a named action
     // Note: has a different signature than DocStep's 'execute' function.
+    */
     async execute(recipeName, doc) {
     // note: we expect DbDoc, could check and convert dict if it comes up
         this.history.triedRecipes.push(recipeName);
@@ -95,28 +99,19 @@ export class NDocRecipe {
             history: _.cloneDeep(this.history),
         };
 
-        //@@IMPORTANT: WHERE SHOULD THIS GO.
+        //@@IMPORTANT: This goes in cleanup or client functionality.
         // this.finish();
-
-        // DON'T DO THIS HERE!, we use use this to know which cleanup to do
-        // Therefore, let the client drive the reset cycle:
-        //      this.clearRecipeHistory();
         return retport;
     }
 
-    async executeStep() {
-        /* Supporting multiple step types:
-
-        */
-    }
-
+    /* executeRecipe
+        The execute function above is deprecated in favor of this model.
+        We accept js objects with a recipeName and `input` object.
+        The input is an orthogonal object with key names that convey dataType, and of which there can be only one entity, though the entity can be a list or object.
+        The routines don't have to use NovemDoc or NDocStep, though
+        they are wrapped by the latter for the recipe book. */    
     async executeRecipe(inputPackage) {
-        // 2021-03-17: new version where NDocStep is used to wrap routines.
-        // The `executeRecipe` has a different philosophy than the `execute` function.
-        //  * execute - Custom NDocStep subclasses use NovemDoc for data throughput.
-        //  * executeRecipe - NDocStep base class can wrap a routine.
-        //
-        const {recipeName, input: originalInput} = inputPackage;
+        const {recipeName, input: originalInput = {}} = inputPackage;
         this.history.triedRecipes.push(recipeName);
         let status = 'normal';
         let message = null;
@@ -161,12 +156,17 @@ export class NDocRecipe {
                 // STEP EXECUTED
                 //
                 //////
+                const { status, error, message } = throughput;
+                if (status === 'error') {
+                    this.history.failedRecipes.push(recipeName);
+                    console.error('(NDR167) error in step #${actionIndex}', message);
+                }
             }
             this.history.successRecipes.push(recipeName);
-            
+            const { status, error, message } = throughput;
             const recipeReport = {
-                status: 'success',
-                success: true,
+                status: status,
+                success: !error,
                 history: _.cloneDeep(this.history),
             };
             const output = cloneDeep(throughput);
@@ -191,7 +191,7 @@ export class NDocRecipe {
     }
 
     async finish(report = {}) {
-    // Called by client to tell DocAciton to shut down, nec to close mongo connection.
+    // Called by client to tell DocAction to shut down, nec to close mongo connection.
     // 'cleanup' is a special action that can be used singly to cleanup
     // but also is an action, so the connection could be closed at the end of a recipe.
         let oneSuccess = false;

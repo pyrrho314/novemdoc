@@ -10,7 +10,7 @@ import NovemDoc from '../../novemdoc.js'
 import packageLogger from '../../pkgLogger.js';
 import {NDocRecipe} from '../NDocRecipe.js';
 import {mongoRecipeChapter} from './mongoSteps.js';
-import {prettyJson, shortJson} from '../../misc/pretty.js';
+import {mongoRoutinesChapter} from './mongoRoutines.js';
 
 const ObjectID = mongodb.ObjectID;
 const log = packageLogger.subLogger('nMongoFunc');
@@ -18,6 +18,7 @@ const log = packageLogger.subLogger('nMongoFunc');
 const ndocRecipe = new NDocRecipe({
     cookBook: {
         mongo: mongoRecipeChapter,
+        mongo2: mongoRoutinesChapter,
     }
 });
 
@@ -136,6 +137,7 @@ export async function mongoSave(opts) {
 
     const {
         doc, // required: doc to save
+        finish = false, 
     } = opts;
 
     try {
@@ -146,11 +148,40 @@ export async function mongoSave(opts) {
             `(mF43) Saved Result (${JSON.stringify(answer, null, 4)}))`
         );
 
-        //const report = await ndocRecipe.finish();
+        if (finish) {
+            const report = await ndocRecipe.finish();
+            log.answer(`Cleanup Report ${JSON.stringify(report, null, 4)}`);
+        }
 
         return answer;
     } catch (err) {
         log.error('contacttool savey Nope:', err.message, err.stack);
+
+    }
+}
+
+export async function mongoMigrateIndex(opts) {
+    const {
+        collectionName, // will be doctype
+        finish = false, 
+    } = opts;
+
+    try {
+
+        const answer = await ndocRecipe.execute('mongo2.migrateIndexIfNeeded',);
+
+        log.answer(
+            `(mF43) Saved Result (${JSON.stringify(answer, null, 4)}))`
+        );
+
+        if (finish) {
+            const report = await ndocRecipe.finish();
+            log.answer(`Cleanup Report ${JSON.stringify(report, null, 4)}`);
+        }
+
+        return answer;
+    } catch (err) {
+        log.error('migrate routine say Nope:', err.message, err.stack);
 
     }
 }
