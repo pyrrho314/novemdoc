@@ -54,6 +54,7 @@ export async function mongoSave(input) {
     try {
         const doc = NovemDoc.from_thing(document);
         const resolvedCollectionName = collectionName ?? doc.getMeta('doctype', 'misc');
+        doc.setMeta('doctype', resolvedCollectionName);
         const mongoId = doc.get('_id', null);
         const dict = doc.data;
 
@@ -98,7 +99,7 @@ export async function mongoSave(input) {
 export async function mongoQuery(input) {
     const { collectionName, query = {}, queryName = 'unknownQuery' } = input;
     try {
-        log.query(`(mR88) query (${queryName}) on '${collectionName}', ${JSON.stringify(query, null, 4)}`);
+        log.query(`query (${queryName}) on '${collectionName}' (mr101) ${JSON.stringify(query, null, 4)}`);
 
         const mongoDb = await getMongoDb();
         const collection = await mongoDb.collection(collectionName);
@@ -185,8 +186,6 @@ export async function getMigrationRecord(migrationRecordRq) {
     });
     const { queryResult } = migrationQueryResults;
 
-    console.log('(mr219)', migrationQueryResults);
-
     const migrationRecord = queryResult.length > 0 ? queryResult[0] : null;
     return migrationRecord;
 }
@@ -205,12 +204,12 @@ export async function saveMigrationRecord(migrationRecord) {
 
 /// Recipe Routines that pass input to out (ammend out).
 export async function mongoCheckMigrationState(input) {
-    console.log('(mR60) mongoMigrationCheck', input);
     const {
         collectionName,
         desiredMigration,
         calculateNeededMigrations,
     } = input;
+    log.info('mongoMigrationCheck (mr211):', { collectionName, desiredMigration });
     try {
         const mongoDb = await getMongoDb();
         const collection = await mongoDb.collection(collectionName);
@@ -226,7 +225,7 @@ export async function mongoCheckMigrationState(input) {
             migrationReciepts,
             existingMigrations,
         });
-        console.log('indexInfo', neededMigrations);
+        log.info(`neededMigrations (mr227): ${log.clr.created(neededMigrations.length ? neededMigrations : "NONE")}`);
         return {
             ...input,
             indexInfo,
@@ -253,7 +252,7 @@ export async function mongoMigrateIf(input) {
         // neededMigrations,
     } = input;
     try {
-        log.info('(mR74) mongoMigrateIndexIf input', input);
+        log.detail('(mR74) mongoMigrateIndexIf input', input);
         const mongoDb = await getMongoDb();
         const collection = await mongoDb.collection(collectionName);
         
